@@ -4,7 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const helmet = require('helmet');
 const compression = require('compression');
-const mongoSanitize = require('express-mongo-sanitize');
+
 const rateLimit = require('express-rate-limit');
 
 console.log('🚀 Iniciando Adoptapet Backend v2.0...');
@@ -12,25 +12,72 @@ console.log('🚀 Iniciando Adoptapet Backend v2.0...');
 const app = express();
 
 // ============================================
-// CONFIGURACIÓN DE SEGURIDAD
+// 1. CORS - DEBE IR PRIMERO ⚠️
 // ============================================
+app.use(cors({
+  origin: ['http://127.0.0.1:56167', 'http://localhost:56167', 'http://127.0.0.1:5500', 'http://localhost:5500'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Helmet para headers de seguridad
+// ============================================
+// 2. HELMET - Seguridad de headers
+// ============================================
 app.use(helmet({
-  contentSecurityPolicy: false, // Desactivar si usas CDNs
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
 
-// Protección contra NoSQL injection
-app.use(mongoSanitize());
-
-// Compresión de respuestas
+// ============================================
+// 3. COMPRESIÓN
+// ============================================
 app.use(compression());
 
-// Rate limiting general
+// ============================================
+// 4. BODY PARSERS (antes de mongoSanitize)
+// ============================================
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ============================================
+// 5. PROTECCIÓN NoSQL (después de parsers)
+// ============================================
+// ============================================
+// 5. PROTECCIÓN NoSQL INJECTION (Manual)
+// ============================================
+app.use((req, res, next) => {
+  // Función para sanitizar objetos recursivamente
+  const sanitize = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    for (let key in obj) {
+      // Eliminar claves que empiezan con $ o contienen puntos
+      if (key.startsWith('$') || key.includes('.')) {
+        delete obj[key];
+      } else if (typeof obj[key] === 'object') {
+        // Recursivo para objetos anidados
+        sanitize(obj[key]);
+      }
+    }
+    return obj;
+  };
+  
+  // Sanitizar body, query y params
+  if (req.body) req.body = sanitize(req.body);
+  if (req.query) req.query = sanitize(req.query);
+  if (req.params) req.params = sanitize(req.params);
+  
+  next();
+});
+
+console.log('✅ Protección NoSQL Injection activada');
+// ============================================
+// 6. RATE LIMITING
+// ============================================
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // límite de 100 requests por IP
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: { 
     success: false, 
     message: 'Demasiadas peticiones, intenta más tarde' 
@@ -40,10 +87,9 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Rate limiting para autenticación
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hora
-  max: 5, // 5 intentos por hora
+  windowMs: 60 * 60 * 1000,
+  max: 5,
   message: { 
     success: false, 
     message: 'Demasiados intentos de login, intenta en 1 hora' 
@@ -51,68 +97,33 @@ const authLimiter = rateLimit({
 });
 
 // ============================================
-// MIDDLEWARE BÁSICO
-// ============================================
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// ============================================
-// CONFIGURACIÓN DE CORS MEJORADA
-// ============================================
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // Permitir requests sin origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['X-Total-Count', 'X-Page-Number']
-}));
-
-// ============================================
-// CONFIGURACIÓN DE SESIONES MEJORADA
+// 7. CONFIGURACIÓN DE SESIONES
 // ============================================
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'adoptapet-secret-2024-change-this',
   resave: false,
   saveUninitialized: false,
-  name: 'adoptapet.sid', // Nombre personalizado de cookie
+  name: 'adoptapet.sid',
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // true en producción
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 horas
+    maxAge: 24 * 60 * 60 * 1000,
     sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
   }
 };
 
-// En producción, usar store persistente (ej: connect-mongo)
 if (process.env.NODE_ENV === 'production' && process.env.MONGO_URI) {
   const MongoStore = require('connect-mongo');
   sessionConfig.store = MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    touchAfter: 24 * 3600 // lazy session update
+    touchAfter: 24 * 3600
   });
 }
 
 app.use(session(sessionConfig));
 
 // ============================================
-// INICIALIZAR PASSPORT
+// 8. PASSPORT
 // ============================================
 let passport;
 let passportLoaded = false;
@@ -129,17 +140,14 @@ try {
 }
 
 // ============================================
-// CONECTAR A MONGODB
+// 9. MONGODB
 // ============================================
 let mongoConnected = false;
 
 (async () => {
   try {
-    // Configurar Mongoose antes de conectar
     const mongoose = require('mongoose');
     mongoose.set('strictQuery', false);
-    
-    // Deshabilitar warning de índices duplicados
     mongoose.set('autoIndex', true);
     
     const { connectDB } = require('./src/config/database');
@@ -153,7 +161,7 @@ let mongoConnected = false;
 })();
 
 // ============================================
-// LOGGING MIDDLEWARE MEJORADO
+// 10. LOGGING
 // ============================================
 const logger = require('./src/utils/logger');
 
@@ -171,8 +179,6 @@ app.use((req, res, next) => {
 // ============================================
 // RUTAS BÁSICAS
 // ============================================
-
-// Health check mejorado
 app.get('/health', (req, res) => {
   const health = {
     success: true,
@@ -194,7 +200,6 @@ app.get('/health', (req, res) => {
   res.status(200).json(health);
 });
 
-// Info del API
 app.get('/api/info', (req, res) => {
   res.json({
     name: 'Adoptapet API',
@@ -211,14 +216,13 @@ app.get('/api/info', (req, res) => {
   });
 });
 
-// Ruta de test de configuración
 app.get('/test/config', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     config: {
       nodeEnv: process.env.NODE_ENV || 'development',
-      port: process.env.PORT || 3000,
+      port: process.env.PORT || 5500,
       passport: passportLoaded ? '✅ Cargado' : '❌ NO cargado',
       mongodb: mongoConnected ? '✅ Conectado' : '❌ Desconectado',
       session: '✅ Configurado',
@@ -231,18 +235,15 @@ app.get('/test/config', (req, res) => {
 });
 
 // ============================================
-// RUTAS DE AUTENTICACIÓN CON GOOGLE OAUTH
+// RUTAS DE GOOGLE OAUTH
 // ============================================
-
 if (passportLoaded) {
-  // Iniciar autenticación
   app.get('/auth/google', 
     passport.authenticate('google', { 
       scope: ['profile', 'email']
     })
   );
 
-  // Callback de Google
   app.get('/auth/google/callback', 
     passport.authenticate('google', { 
       failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5500'}/login.html?error=auth_failed`,
@@ -256,7 +257,6 @@ if (passportLoaded) {
         
         console.log('✅ Usuario autenticado:', req.user.email);
         
-        // Generar JWT
         const jwt = require('jsonwebtoken');
         const token = jwt.sign(
           { 
@@ -268,7 +268,6 @@ if (passportLoaded) {
           { expiresIn: '7d' }
         );
         
-        // Datos del usuario
         const userData = {
           id: req.user._id || req.user.id,
           nombre: req.user.name,
@@ -277,7 +276,6 @@ if (passportLoaded) {
           rol: req.user.role || 'usuario'
         };
         
-        // Redirigir con token
         const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
         const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
         
@@ -291,7 +289,6 @@ if (passportLoaded) {
     }
   );
 
-  // Obtener usuario actual
   app.get('/api/auth/me', (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated() && req.user) {
       res.json({
@@ -312,7 +309,6 @@ if (passportLoaded) {
     }
   });
 
-  // Cerrar sesión
   app.post('/auth/logout', (req, res) => {
     const email = req.user?.email || 'Usuario desconocido';
     
@@ -341,7 +337,6 @@ if (passportLoaded) {
   });
 
 } else {
-  // Rutas deshabilitadas si no hay Passport
   app.get('/auth/google', (req, res) => {
     res.status(503).json({
       success: false,
@@ -363,40 +358,36 @@ if (passportLoaded) {
 try {
   const authRoutes = require('./src/routes/authRoutes');
   app.use('/api/auth', authLimiter, authRoutes);
-  require('./src/utils/logger').log.success('Rutas de autenticación tradicional cargadas');
+  logger.log.success('Rutas de autenticación tradicional cargadas');
 } catch (error) {
-  require('./src/utils/logger').log.warning('Rutas de autenticación tradicional no disponibles');
+  logger.log.warning('Rutas de autenticación tradicional no disponibles');
 }
 
 // ============================================
 // RUTAS DE LA APLICACIÓN
 // ============================================
-
-// Mascotas
 try {
   const petRoutes = require('./src/routes/petRoutes');
   app.use('/api/pets', petRoutes);
-  require('./src/utils/logger').log.success('Rutas de mascotas cargadas');
+  logger.log.success('Rutas de mascotas cargadas');
 } catch (error) {
-  require('./src/utils/logger').log.warning('Rutas de mascotas no disponibles');
+  logger.log.warning('Rutas de mascotas no disponibles');
 }
 
-// Usuarios
 try {
   const userRoutes = require('./src/routes/userRoutes');
   app.use('/api/users', userRoutes);
-  require('./src/utils/logger').log.success('Rutas de usuarios cargadas');
+  logger.log.success('Rutas de usuarios cargadas');
 } catch (error) {
-  require('./src/utils/logger').log.warning('Rutas de usuarios no disponibles');
+  logger.log.warning('Rutas de usuarios no disponibles');
 }
 
-// Solicitudes de adopción
 try {
   const applicationRoutes = require('./src/routes/applicationRoutes');
   app.use('/api/applications', applicationRoutes);
-  require('./src/utils/logger').log.success('Rutas de solicitudes cargadas');
+  logger.log.success('Rutas de solicitudes cargadas');
 } catch (error) {
-  require('./src/utils/logger').log.warning('Rutas de solicitudes no disponibles');
+  logger.log.warning('Rutas de solicitudes no disponibles');
 }
 
 // ============================================
@@ -420,7 +411,6 @@ app.use((err, req, res, next) => {
     console.error('   Stack:', err.stack);
   }
   
-  // Error de CORS
   if (err.message === 'No permitido por CORS') {
     return res.status(403).json({
       success: false,
@@ -429,7 +419,6 @@ app.use((err, req, res, next) => {
     });
   }
   
-  // Error de validación de Mongoose
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
@@ -438,7 +427,6 @@ app.use((err, req, res, next) => {
     });
   }
   
-  // Error de cast de MongoDB
   if (err.name === 'CastError') {
     return res.status(400).json({
       success: false,
@@ -446,7 +434,6 @@ app.use((err, req, res, next) => {
     });
   }
   
-  // Error de duplicado
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern)[0];
     return res.status(400).json({
@@ -455,7 +442,6 @@ app.use((err, req, res, next) => {
     });
   }
   
-  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       success: false,
@@ -470,7 +456,6 @@ app.use((err, req, res, next) => {
     });
   }
   
-  // Error genérico
   const statusCode = err.statusCode || err.status || 500;
   res.status(statusCode).json({
     success: false,
@@ -482,13 +467,10 @@ app.use((err, req, res, next) => {
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5500;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const server = app.listen(PORT, HOST, () => {
-  const logger = require('./src/utils/logger');
-  
-  // Mostrar banner de inicio
   logger.showStartupBanner({
     port: PORT,
     host: HOST,
@@ -499,16 +481,14 @@ const server = app.listen(PORT, HOST, () => {
 });
 
 // ============================================
-// MANEJO DE CIERRE GRACEFUL
+// CIERRE GRACEFUL
 // ============================================
 const gracefulShutdown = (signal) => {
-  const logger = require('./src/utils/logger');
   logger.showShutdown(signal);
   
   server.close(async () => {
     logger.log.success('Servidor HTTP cerrado');
     
-    // Cerrar conexión a MongoDB
     if (mongoConnected) {
       try {
         const mongoose = require('mongoose');
@@ -523,7 +503,6 @@ const gracefulShutdown = (signal) => {
     process.exit(0);
   });
   
-  // Forzar cierre después de 10 segundos
   setTimeout(() => {
     logger.log.warning('Forzando cierre después de timeout');
     process.exit(1);
@@ -533,10 +512,8 @@ const gracefulShutdown = (signal) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Manejo de errores no capturados
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
-  // En producción, podrías querer cerrar el servidor aquí
 });
 
 process.on('uncaughtException', (error) => {

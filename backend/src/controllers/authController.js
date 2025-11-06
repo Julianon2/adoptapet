@@ -1,6 +1,212 @@
-// @desc    Callback de Google OAuth - Redirigir con token
+// =============================================
+// CONTROLADOR DE AUTENTICACIÓN - Adoptapet
+// =============================================
+
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
+// =============================================
+// FUNCIÓN AUXILIAR: Generar JWT
+// =============================================
+const generateToken = (userId) => {
+  return jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET || 'adoptapet_secreto_super_seguro_2025',
+    { expiresIn: '7d' }
+  );
+};
+
+// =============================================
+// @desc    Registrar nuevo usuario
+// @route   POST /api/auth/register
+// @access  Public
+// =============================================
+exports.register = async (req, res) => {
+  try {
+    const { nombre, email, password, passwordConfirm, telefono } = req.body;
+
+    console.log('📝 Intento de registro:', { nombre, email, telefono });
+
+    // Validar que las contraseñas coincidan
+    if (password !== passwordConfirm) {
+      return res.status(400).json({
+        success: false,
+        message: 'Las contraseñas no coinciden'
+      });
+    }
+
+    // Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'El email ya está registrado'
+      });
+    }
+
+    // Hash de la contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Crear nuevo usuario
+    const newUser = new User({
+      name: nombre,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      phone: telefono || undefined,
+      role: 'usuario'
+    });
+
+    await newUser.save();
+
+    console.log('✅ Usuario registrado exitosamente:', newUser.email);
+
+    // Generar JWT
+    const token = generateToken(newUser._id);
+
+    // Respuesta exitosa
+    res.status(201).json({
+      success: true,
+      message: 'Usuario registrado exitosamente',
+      token,
+      user: {
+        id: newUser._id,
+        nombre: newUser.name,
+        email: newUser.email,
+        telefono: newUser.phone,
+        rol: newUser.role,
+        avatar: newUser.avatar
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error en registro:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al registrar usuario',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// =============================================
+// @desc    Iniciar sesión
+// @route   POST /api/auth/login
+// @access  Public
+// =============================================
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log('🔐 Intento de login:', email);
+
+    // Buscar usuario y seleccionar password
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales inválidas'
+      });
+    }
+
+    // Verificar si el usuario tiene contraseña (puede ser usuario de Google)
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: 'Esta cuenta fue creada con Google. Por favor inicia sesión con Google.'
+      });
+    }
+
+    // Verificar contraseña
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales inválidas'
+      });
+    }
+
+    console.log('✅ Login exitoso:', user.email);
+
+    // Generar JWT
+    const token = generateToken(user._id);
+
+    // Respuesta exitosa
+    res.json({
+      success: true,
+      message: 'Login exitoso',
+      token,
+      user: {
+        id: user._id,
+        nombre: user.name,
+        email: user.email,
+        telefono: user.phone,
+        direccion: user.location?.address || '',
+        avatar: user.avatar,
+        rol: user.role,
+        verificado: user.isFullyVerified
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al iniciar sesión',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// =============================================
+// @desc    Obtener perfil del usuario autenticado
+// @route   GET /api/auth/me
+// @access  Private
+// =============================================
+exports.getMe = async (req, res) => {
+  try {
+    // El usuario ya viene del middleware protect
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        nombre: user.name,
+        email: user.email,
+        telefono: user.phone,
+        direccion: user.location?.address || '',
+        avatar: user.avatar,
+        rol: user.role,
+        verificado: user.isFullyVerified
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener perfil',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// =============================================
+// @desc    Callback de Google OAuth
 // @route   GET /auth/google/callback
 // @access  Public (llamado por Google)
+// =============================================
 exports.googleCallback = async (req, res) => {
   try {
     console.log('🔄 Google callback recibido');
@@ -31,13 +237,15 @@ exports.googleCallback = async (req, res) => {
     };
 
     // Redirigir al frontend con token y usuario
-    const redirectUrl = `http://127.0.0.1:5500/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+    const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
     
-    console.log('🔄 Redirigiendo a frontend:', redirectUrl);
+    console.log('🔄 Redirigiendo a frontend');
     res.redirect(redirectUrl);
 
   } catch (error) {
     console.error('❌ Error en googleCallback:', error);
-    res.redirect('http://127.0.0.1:5500/login.html?error=server_error');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+    res.redirect(`${frontendUrl}/login.html?error=server_error`);
   }
 };

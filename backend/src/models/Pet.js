@@ -122,7 +122,7 @@ const petSchema = new mongoose.Schema({
     story: {
         type: String,
         trim: true,
-        maxlength: [3000, 'La historia no puede tener más de 3000 caracteres']
+        maxlength: [5500, 'La historia no puede tener más de 5500 caracteres']
     },
     
     personality: {

@@ -7,7 +7,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/google/callback',
+      callbackURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5500/auth/google/callback',
       proxy: true // Importante para producción con HTTPS
     },
     

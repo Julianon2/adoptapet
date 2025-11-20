@@ -1,254 +1,326 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google" content="notranslate">
-    <title>AdoptaPet - Encuentra tu compañero perfecto</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdoptaPet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fadeInDown {
+      animation: fadeInDown 1s;
+    }
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @keyframes pulse-soft {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
     
-    <script>
-        // Capturar token de la URL cuando viene de Google OAuth
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const userParam = urlParams.get('user');
-        
-        if (token && userParam) {
-            try {
-                // Guardar en localStorage
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', userParam);
-                
-                console.log('✅ Token guardado en localStorage');
-                console.log('✅ Usuario guardado en localStorage');
-                
-                // Limpiar la URL (quitar los parámetros)
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (error) {
-                console.error('Error al guardar en localStorage:', error);
-            }
-        }
-    </script>
+    .animate-pulse-soft {
+      animation: pulse-soft 2s infinite;
+    }
     
-    <style>
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .animate-fadeInDown {
-            animation: fadeInDown 1s;
-        }
-    </style>
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 min-h-screen">
-    
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-cyan-500 to-cyan-600 shadow-lg">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <!-- Logo -->
-                <div class="text-3xl font-bold text-white tracking-tight">
-                    🐾 ADOPTAPET
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <ul class="hidden md:flex space-x-8">
-                    <li><a href="index.html" class="text-white font-medium underline hover:-translate-y-1 transition-transform duration-300 inline-block">Inicio</a></li>
-                    <li><a href="login.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Login</a></li>
-                    <li><a href="register.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Registro</a></li>
-                    <li><a href="adoptar.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Adoptar</a></li>
-                    <li><a href="perfil.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Perfil</a></li>
-                    <li><a href="notificaciones.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Notificaciones</a></li>
-                    <li><a href="favoritos.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Favoritos</a></li>
-                    <li><a href="ajustes.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Ajustes</a></li>
-                </ul>
-                
-                <!-- Mobile Menu Button -->
-                <button class="md:hidden text-white" id="mobile-menu-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-        </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
-        <h1 class="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg animate-fadeInDown">
-            Encuentra tu compañero perfecto 🐶🐱
-        </h1>
-        <p class="text-xl md:text-2xl mb-8 opacity-95">
-            Miles de mascotas esperan un hogar lleno de amor. ¿Serás tú quien cambie su vida?
-        </p>
-        <div class="flex flex-wrap gap-4 justify-center">
-            <a href="adoptar.html" class="px-10 py-4 bg-white text-purple-600 rounded-full text-lg font-bold hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
-                Explorar Mascotas
-            </a>
-            <a href="publicaciones.html" class="px-10 py-4 bg-transparent text-white border-2 border-white rounded-full text-lg font-bold hover:bg-white hover:text-purple-600 transition-all duration-300">
-                Publicar en Adopción
-            </a>
-        </div>
-    </section>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
 
-    <!-- Featured Pets -->
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-4xl font-bold text-center text-gray-800 mb-12">
-                Mascotas Destacadas
-            </h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Pet Card 1 -->
-                <div class="bg-white rounded-3xl overflow-hidden shadow-lg hover:-translate-y-3 hover:shadow-2xl transition-all duration-300 cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop" alt="Gato" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Luna</h3>
-                        <p class="text-gray-600 mb-4">Gato • 2 meses • Hembra</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Todas las vacunas</span>
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Juguetona</span>
-                        </div>
-                        <button class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-3 rounded-xl font-bold hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300">
-                            Quiero adoptarla ❤️
-                        </button>
-                    </div>
-                </div>
+<!-- TOP BAR con gradiente moderno -->
+<header class="bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500  shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 
-                <!-- Pet Card 2 -->
-                <div class="bg-white rounded-3xl overflow-hidden shadow-lg hover:-translate-y-3 hover:shadow-2xl transition-all duration-300 cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop" alt="Perro" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Max</h3>
-                        <p class="text-gray-600 mb-4">Perro • 1 año • Macho</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Entrenado</span>
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Amigable</span>
-                        </div>
-                        <button class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-3 rounded-xl font-bold hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300">
-                            Quiero adoptarlo ❤️
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Pet Card 3 -->
-                <div class="bg-white rounded-3xl overflow-hidden shadow-lg hover:-translate-y-3 hover:shadow-2xl transition-all duration-300 cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop" alt="Gato" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Michi</h3>
-                        <p class="text-gray-600 mb-4">Gato • 6 meses • Macho</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Vacunado</span>
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Cariñoso</span>
-                        </div>
-                        <button class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-3 rounded-xl font-bold hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300">
-                            Quiero adoptarlo ❤️
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Pet Card 4 -->
-                <div class="bg-white rounded-3xl overflow-hidden shadow-lg hover:-translate-y-3 hover:shadow-2xl transition-all duration-300 cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=400&h=300&fit=crop" alt="Perro" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Bella</h3>
-                        <p class="text-gray-600 mb-4">Perro • 3 años • Hembra</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Esterilizada</span>
-                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Tranquila</span>
-                        </div>
-                        <button class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-3 rounded-xl font-bold hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300">
-                            Quiero adoptarla ❤️
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 py-16">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
-                <div class="p-8">
-                    <div class="text-5xl font-bold mb-2">2,500+</div>
-                    <div class="text-lg opacity-90">Adopciones Exitosas</div>
-                </div>
-                <div class="p-8">
-                    <div class="text-5xl font-bold mb-2">850+</div>
-                    <div class="text-lg opacity-90">Mascotas Disponibles</div>
-                </div>
-                <div class="p-8">
-                    <div class="text-5xl font-bold mb-2">150+</div>
-                    <div class="text-lg opacity-90">Refugios Asociados</div>
-                </div>
-                <div class="p-8">
-                    <div class="text-5xl font-bold mb-2">10,000+</div>
-                    <div class="text-lg opacity-90">Usuarios Activos</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Logout Button -->
-    <div class="text-center py-8">
-        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-full font-bold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-            Cerrar Sesión
-        </button>
+    <!-- Logo + Nombre -->
+    <div class="flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform">
+      <span class="text-4xl drop-shadow-lg">🐾</span>
+      <h1 class="text-2xl font-bold tracking-wide text-white drop-shadow-md">AdoptaPet</h1>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 text-center">
-        <p>&copy; 2025 AdoptaPet. Todos los derechos reservados. Hecho con ❤️ para las mascotas.</p>
-    </footer>
+    <!-- Search mejorado -->
+    <div class="flex-1 max-w-xl mx-6 relative">
+      <input type="text"
+        placeholder="Buscar mascotas, refugios..."
+        class="w-full px-6 py-3 pr-12 border-2 border-white/30 bg-white/90 backdrop-blur rounded-full focus:ring-4 focus:ring-white/50 focus:border-white outline-none shadow-lg transition-all">
+      <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+    </div>
 
-    <script>
-        // Logout function
-        function logout() {
-            try {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Error al cerrar sesión:', error);
-                window.location.href = 'login.html';
-            }
-        }
+    <!-- Icons mejorados -->
+  <div class="flex items-center gap-4">
+    <button class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#8b5cf6" stroke-width="2.5" viewBox="0 0 24 24" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6A8.38 8.38 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z"/>
+      </svg>
+    </button>
 
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
 
-        // Adopt button interaction
-        document.querySelectorAll('button').forEach(btn => {
-            if (btn.textContent.includes('Quiero adoptar')) {
-                btn.addEventListener('click', function() {
-                    const petnombre = this.closest('div').querySelector('h3').textContent;
-                    alert(`¡Genial! Iniciando proceso de adopción para ${petnombre}. En una aplicación real, esto abriría un formulario de adopción.`);
-                });
-            }
-        });
+    <button onclick="window.location.href='notificaciones.html'" class="relative w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-6 h-6 stroke-[#f59e0b] stroke-[2.5]">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a1.5 1.5 0 1 1-3 0M4.5 9a7.5 7.5 0 1 1 15 0c0 3.15.75 4.5 1.5 5.25H3c.75-.75 1.5-2.1 1.5-5.25Z"/>
+      </svg>
+      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse-soft shadow-md">
+        3
+      </span>
+    </button>
 
-        // Mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        mobileMenuButton?.addEventListener('click', function() {
-            alert('Menú móvil - Agrega la lógica según necesites');
-        });
-    </script>
+
+
+    <a href="perfil.html" 
+       class="w-11 h-11 rounded-full transition-transform hover:scale-110 shadow-lg cursor-pointer block">
+        <img src="https://via.placeholder.com/44" 
+             alt="Imagen de Perfil de Usuario"
+             class="w-full h-full rounded-full border-3 border-white object-cover" />
+    </a>
+    
+    <a href="perfil.html" class="ml-2 text-white font-semibold hover:underline">Nombre de Usuario</a> 
+  </div>
+
+    <!-- Botón Hamburguesa (móvil) -->
+    <button id="menuBtn" class="ml-4 text-3xl text-white md:hidden hover:scale-110 transition">☰</button>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div id="menu" class="hidden bg-white/95 backdrop-blur border-t shadow-lg">
+    <nav class="flex flex-col p-4 space-y-2">
+      <a href="#" class="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold shadow-md">🏠 Inicio</a>
+      <a href="adoptar.html" class="px-4 py-3 rounded-xl hover:bg-purple-100 font-semibold transition">🐕 Adoptar</a>
+      <a href="#" class="px-4 py-3 rounded-xl hover:bg-purple-100 font-semibold transition">📝 Publicar</a>
+      <a href="#" class="px-4 py-3 rounded-xl hover:bg-purple-100 font-semibold transition">👥 Amigos</a>
+      <a href="#" class="px-4 py-3 rounded-xl hover:bg-purple-100 font-semibold transition">⚙️ Ajustes</a>
+    </nav>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="max-w-7xl mx-auto pt-6 px-4 grid grid-cols-1 md:grid-cols-12 gap-6 pb-8">
+
+  <!-- LEFT SIDEBAR (Desktop) mejorado -->
+  <aside class="hidden md:block md:col-span-3 space-y-2">
+    <a href="#" class="block px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover-lift">🏠 Inicio</a>
+    <a href="adoptar.html" class="block px-5 py-3 rounded-xl bg-white hover:bg-purple-50 font-semibold shadow hover-lift transition">🐕 Adoptar</a>
+    <a href="#" class="block px-5 py-3 rounded-xl bg-white hover:bg-purple-50 font-semibold shadow hover-lift transition">📝 Publicar</a>
+    <a href="#" class="block px-5 py-3 rounded-xl bg-white hover:bg-purple-50 font-semibold shadow hover-lift transition">👥 Amigos</a>
+    <a href="#" class="block px-5 py-3 rounded-xl bg-white hover:bg-purple-50 font-semibold shadow hover-lift transition">⚙️ Ajustes</a>
+    
+    <!-- Categorías adicionales -->
+    <div class="mt-6 pt-4 border-t">
+      <h3 class="px-2 text-sm font-bold text-gray-500 uppercase mb-2">Categorías</h3>
+      <a href="#" class="block px-5 py-2 rounded-lg hover:bg-purple-50 text-gray-700 transition">🐕 Perros</a>
+      <a href="#" class="block px-5 py-2 rounded-lg hover:bg-purple-50 text-gray-700 transition">🐈 Gatos</a>
+      <a href="#" class="block px-5 py-2 rounded-lg hover:bg-purple-50 text-gray-700 transition">🐰 Otros</a>
+    </div>
+  </aside>
+
+  <!-- FEED mejorado -->
+  <main class="md:col-span-6 space-y-6">
+
+    <!-- Crear Publicación con mejor diseño -->
+    <div class="bg-white rounded-2xl shadow-lg p-5 hover-lift">
+      <div class="flex gap-4 items-center">
+        <img src="https://via.placeholder.com/48" class="w-12 h-12 rounded-full shadow-md" />
+        <input type="text" placeholder="¿Qué mascota quieres compartir hoy?"
+               class="flex-1 bg-gradient-to-r from-gray-50 to-gray-100 px-5 py-3 rounded-full focus:outline-none focus:ring-4 focus:ring-purple-300 transition-all">
+      </div>
+      <div class="flex justify-around mt-4 pt-4 border-t border-gray-100">
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-purple-50 text-purple-600 font-medium transition-all hover:scale-105">
+          📸 <span>Foto</span>
+        </button>
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-purple-50 text-purple-600 font-medium transition-all hover:scale-105">
+          🐕 <span>Mascota</span>
+        </button>
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-purple-50 text-purple-600 font-medium transition-all hover:scale-105">
+          📍 <span>Ubicación</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post mejorado -->
+    <article class="bg-white rounded-2xl shadow-lg overflow-hidden hover-lift">
+      <div class="p-5">
+        <div class="flex gap-3 items-center mb-4">
+          <img src="https://via.placeholder.com/48" class="w-12 h-12 rounded-full shadow-md" />
+          <div>
+            <h3 class="font-bold text-lg">Refugio San Luis</h3>
+            <p class="text-sm text-gray-500">Hace 2 horas • 📍 Bogotá</p>
+          </div>
+          <button class="ml-auto text-gray-400 hover:text-gray-600 text-2xl">⋯</button>
+        </div>
+        <p class="mb-4 text-gray-700 leading-relaxed">Tenemos esta hermosa perrita lista para encontrar un nuevo hogar lleno de amor. 🏡💕 Es muy cariñosa y se lleva bien con niños.</p>
+      </div>
+      
+      <img src="https://placedog.net/600" class="w-full h-96 object-cover" />
+      
+      <div class="p-5">
+        <!-- Stats -->
+        <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+          <span>❤️ 127 me gusta</span>
+          <span>💬 23 comentarios</span>
+        </div>
+        
+        <!-- Action buttons mejorados -->
+        <div class="flex justify-around items-center pt-3 border-t border-gray-100">
+          <button onclick="toggleLike(this)" class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-red-50 text-gray-600 hover:text-red-500 font-medium transition-all group">
+            <span class="heart text-2xl group-hover:scale-125 transition-transform">♡</span>
+            <span>Me gusta</span>
+          </button>
+
+          <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-blue-50 text-gray-600 hover:text-blue-500 font-medium transition-all group">
+            <span class="text-2xl group-hover:scale-125 transition-transform">💬</span>
+            <span>Comentar</span>
+          </button>
+
+          <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-green-50 text-gray-600 hover:text-green-500 font-medium transition-all group">
+            <span class="text-2xl group-hover:scale-125 transition-transform">🔄</span>
+            <span>Compartir</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- Segundo post de ejemplo -->
+    <article class="bg-white rounded-2xl shadow-lg overflow-hidden hover-lift">
+      <div class="p-5">
+        <div class="flex gap-3 items-center mb-4">
+          <img src="https://via.placeholder.com/48" class="w-12 h-12 rounded-full shadow-md" />
+          <div>
+            <h3 class="font-bold text-lg">Fundación Huellitas</h3>
+            <p class="text-sm text-gray-500">Hace 5 horas • 📍 Medellín</p>
+          </div>
+          <button class="ml-auto text-gray-400 hover:text-gray-600 text-2xl">⋯</button>
+        </div>
+        <p class="mb-4 text-gray-700 leading-relaxed">¡Conoce a Max! 🐾 Este gatito de 3 meses busca una familia que lo ame.</p>
+      </div>
+      
+      <img src="https://placekitten.com/600/400" class="w-full h-96 object-cover" />
+      
+      <div class="p-5">
+        <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+          <span>❤️ 89 me gusta</span>
+          <span>💬 15 comentarios</span>
+        </div>
+        
+        <div class="flex justify-around items-center pt-3 border-t border-gray-100">
+          <button onclick="toggleLike(this)" class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-red-50 text-gray-600 hover:text-red-500 font-medium transition-all group">
+            <span class="heart text-2xl group-hover:scale-125 transition-transform">♡</span>
+            <span>Me gusta</span>
+          </button>
+
+          <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-blue-50 text-gray-600 hover:text-blue-500 font-medium transition-all group">
+            <span class="text-2xl group-hover:scale-125 transition-transform">💬</span>
+            <span>Comentar</span>
+          </button>
+
+          <button class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-green-50 text-gray-600 hover:text-green-500 font-medium transition-all group">
+            <span class="text-2xl group-hover:scale-125 transition-transform">🔄</span>
+            <span>Compartir</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR - Nuevo -->
+  <aside class="hidden md:block md:col-span-3 space-y-4">
+    
+    <!-- Mascotas sugeridas -->
+    <div class="bg-white rounded-2xl shadow-lg p-5">
+      <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+        <span>⭐</span> Mascotas destacadas
+      </h3>
+      
+      <div class="space-y-3">
+        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-purple-50 cursor-pointer transition">
+          <img src="https://placedog.net/100" class="w-12 h-12 rounded-full object-cover shadow-md" />
+          <div class="flex-1">
+            <p class="font-semibold text-sm">Luna</p>
+            <p class="text-xs text-gray-500">Pastor Alemán</p>
+          </div>
+          <button class="text-purple-500 hover:text-purple-600">👁️</button>
+        </div>
+        
+        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-purple-50 cursor-pointer transition">
+          <img src="https://placekitten.com/100/100" class="w-12 h-12 rounded-full object-cover shadow-md" />
+          <div class="flex-1">
+            <p class="font-semibold text-sm">Michi</p>
+            <p class="text-xs text-gray-500">Gato Persa</p>
+          </div>
+          <button class="text-purple-500 hover:text-purple-600">👁️</button>
+        </div>
+        
+        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-purple-50 cursor-pointer transition">
+          <img src="https://placedog.net/101" class="w-12 h-12 rounded-full object-cover shadow-md" />
+          <div class="flex-1">
+            <p class="font-semibold text-sm">Rocky</p>
+            <p class="text-xs text-gray-500">Labrador</p>
+          </div>
+          <button class="text-purple-500 hover:text-purple-600">👁️</button>
+        </div>
+      </div>
+      
+      <button class="w-full mt-4 py-2 text-purple-600 hover:text-purple-700 font-medium text-sm">Ver más →</button>
+    </div>
+
+   
+
+    <!-- Enlaces útiles -->
+    <div class="bg-white rounded-2xl shadow-lg p-5">
+      <h3 class="font-bold text-sm mb-3 text-gray-500 uppercase">Enlaces útiles</h3>
+      <div class="space-y-2 text-sm">
+        <a href="#" class="block text-gray-600 hover:text-purple-600 transition">Sobre nosotros</a>
+        <a href="#" class="block text-gray-600 hover:text-purple-600 transition">Ayuda</a>
+        <a href="#" class="block text-gray-600 hover:text-purple-600 transition">Términos</a>
+        <a href="#" class="block text-gray-600 hover:text-purple-600 transition">Privacidad</a>
+      </div>
+      <p class="text-xs text-gray-400 mt-4">© 2025 AdoptaPet</p>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// Toggle menu móvil
+document.getElementById("menuBtn").addEventListener("click", () => {
+  document.getElementById("menu").classList.toggle("hidden");
+});
+
+// Toggle like con animación
+function toggleLike(btn) {
+  const heart = btn.querySelector(".heart");
+  if (heart.textContent === "♡") {
+    heart.textContent = "❤️";
+    heart.classList.add("animate-pulse-soft");
+    btn.classList.add("text-red-500");
+  } else {
+    heart.textContent = "♡";
+    heart.classList.remove("animate-pulse-soft");
+    btn.classList.remove("text-red-500");
+  }
+}
+
+
+
+</script>
+
 </body>
 </html>

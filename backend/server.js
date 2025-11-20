@@ -15,7 +15,7 @@ const app = express();
 // 1. CORS - DEBE IR PRIMERO ⚠️
 // ============================================
 app.use(cors({
-  origin: ['http://127.0.0.1:56167', 'http://localhost:56167', 'http://127.0.0.1:5500', 'http://localhost:5500'],
+  origin: true, // Acepta cualquier origen
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -75,9 +75,14 @@ console.log('✅ Protección NoSQL Injection activada');
 // ============================================
 // 6. RATE LIMITING
 // ============================================
+// ============================================
+// 6. RATE LIMITING - CONFIGURACIÓN CORREGIDA
+// ============================================
+
+// Limiter general para todas las rutas API
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 1000, // 1000 peticiones (MUY permisivo para desarrollo)
   message: { 
     success: false, 
     message: 'Demasiadas peticiones, intenta más tarde' 
@@ -87,13 +92,17 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Limiter para autenticación (MÁS PERMISIVO)
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 1000, // 15 minutos (antes era 1 hora)
+  max: 100, // 100 intentos (antes eran solo 5) ✅
   message: { 
     success: false, 
-    message: 'Demasiados intentos de login, intenta en 1 hora' 
-  }
+    message: 'Demasiados intentos de login, intenta en 15 minutos' 
+  },
+  skipSuccessfulRequests: true, // No contar logins exitosos ✅
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // ============================================

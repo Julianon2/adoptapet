@@ -24,7 +24,7 @@
     <p class="text-gray-600 text-sm mb-8">Dale un hogar a tu nuevo mejor amigo</p>
 
     <!-- Botón de Google -->
-    <a href="http://localhost:3000/auth/google" 
+    <a href="http://localhost:5500/auth/google" 
        class="flex items-center justify-center w-full py-3.5 px-5 bg-white border-2 border-gray-300 rounded-xl text-gray-700 font-semibold text-base hover:bg-gray-50 hover:border-blue-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 mb-5">
       <svg class="w-6 h-6 mr-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -77,36 +77,74 @@
       <!-- Contraseña -->
       <div class="text-left">
         <label for="password" class="block text-gray-700 font-medium mb-2 text-sm">Contraseña</label>
-        <input type="password" 
-               id="password" 
-               name="password" 
-               placeholder="Mínimo 6 caracteres" 
-               required 
-               minlength="6"
-               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors">
+        <div class="relative">
+          <input type="password" 
+                 id="password" 
+                 name="password" 
+                 placeholder="Mínimo 6 caracteres" 
+                 required 
+                 minlength="6"
+                 class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors">
+          <button type="button" 
+                  id="togglePassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+            <!-- Icono de ojo cerrado (ocultar) -->
+            <svg id="eyeOff" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+            </svg>
+            <!-- Icono de ojo abierto (mostrar) -->
+            <svg id="eyeOn" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Confirmar Contraseña -->
       <div class="text-left">
         <label for="confirmPassword" class="block text-gray-700 font-medium mb-2 text-sm">Confirmar Contraseña</label>
-        <input type="password" 
-               id="confirmPassword" 
-               name="confirmPassword" 
-               placeholder="Repite tu contraseña" 
-               required 
-               minlength="6"
-               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors">
+        <div class="relative">
+          <input type="password" 
+                 id="confirmPassword" 
+                 name="confirmPassword" 
+                 placeholder="Repite tu contraseña" 
+                 required 
+                 minlength="6"
+                 class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors">
+          <button type="button" 
+                  id="toggleConfirmPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+            <!-- Icono de ojo cerrado (ocultar) -->
+            <svg id="eyeOffConfirm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+            </svg>
+            <!-- Icono de ojo abierto (mostrar) -->
+            <svg id="eyeOnConfirm" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
         <p id="passwordError" class="text-red-500 text-xs mt-1 hidden">Las contraseñas no coinciden</p>
       </div>
 
-      <!-- Teléfono (opcional) -->
+      <!-- Teléfono -->
       <div class="text-left">
-        <label for="phone" class="block text-gray-700 font-medium mb-2 text-sm">Teléfono (opcional)</label>
-        <input type="tel" 
-               id="phone" 
-               name="telefono" 
-               placeholder="+57 300 1234567"
-               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors">
+        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+          Teléfono <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="tel" 
+          id="telefono" 
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
+          required
+          pattern="[0-9]{10}"
+          maxlength="10"
+          title="Ingresa 10 dígitos numéricos">
+        <small class="block mt-1 text-xs text-gray-500">
+          Solo números, 10 dígitos
+        </small>
       </div>
 
       <!-- Botón de registro -->
@@ -141,6 +179,30 @@
 
   <script>
     const API_URL = 'http://localhost:3000/api';
+
+    // Funcionalidad para mostrar/ocultar contraseñas
+    function togglePasswordVisibility(inputId, btnId, eyeOffId, eyeOnId) {
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      const eyeOff = document.getElementById(eyeOffId);
+      const eyeOn = document.getElementById(eyeOnId);
+      
+      btn.addEventListener('click', function() {
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeOff.classList.add('hidden');
+          eyeOn.classList.remove('hidden');
+        } else {
+          input.type = 'password';
+          eyeOff.classList.remove('hidden');
+          eyeOn.classList.add('hidden');
+        }
+      });
+    }
+
+    // Inicializar toggles de contraseña
+    togglePasswordVisibility('password', 'togglePassword', 'eyeOff', 'eyeOn');
+    togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword', 'eyeOffConfirm', 'eyeOnConfirm');
 
     // Mostrar/ocultar mensajes
     function showMessage(text, type) {
@@ -189,7 +251,7 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
-      const telefono = document.getElementById('phone').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
 
       // Validaciones del cliente
       if (!nombre || nombre.length < 2 || nombre.length > 50) {
@@ -278,5 +340,6 @@
       }
     });
   </script>
+
 </body>
 </html>

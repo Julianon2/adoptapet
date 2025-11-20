@@ -245,3 +245,161 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', handleRegister);
   }
 });
+// =============================================
+// VALIDACIÓN DE TELÉFONO EN TIEMPO REAL
+// =============================================
+document.getElementById('telefono').addEventListener('input', function(e) {
+  // Remover cualquier carácter que no sea número
+  this.value = this.value.replace(/[^0-9]/g, '');
+  
+  // Limitar a 10 dígitos
+  if (this.value.length > 10) {
+    this.value = this.value.slice(0, 10);
+  }
+  
+  // Feedback visual
+  if (this.value.length === 10) {
+    this.classList.remove('is-invalid');
+    this.classList.add('is-valid');
+  } else if (this.value.length > 0) {
+    this.classList.remove('is-valid');
+    this.classList.add('is-invalid');
+  } else {
+    this.classList.remove('is-valid', 'is-invalid');
+  }
+});
+
+// Prevenir pegar texto no numérico
+document.getElementById('telefono').addEventListener('paste', function(e) {
+  e.preventDefault();
+  const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+  const numericText = pastedText.replace(/[^0-9]/g, '').slice(0, 10);
+  this.value = numericText;
+  this.dispatchEvent(new Event('input'));
+});
+
+// =============================================
+// VALIDACIÓN Y ENVÍO DEL FORMULARIO
+// =============================================
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nombre = document.getElementById('nombre').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  
+  // Limpiar errores previos
+  document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+  
+  // VALIDACIÓN DE TELÉFONO
+  if (!/^[0-9]{10}$/.test(telefono)) {
+    mostrarError('El teléfono debe tener exactamente 10 dígitos numéricos');
+    document.getElementById('telefono').classList.add('is-invalid');
+    document.getElementById('telefono').focus();
+    return;
+  }
+  
+  // Validar nombre
+  if (nombre.length < 3) {
+    mostrarError('El nombre debe tener al menos 3 caracteres');
+    document.getElementById('nombre').classList.add('is-invalid');
+    return;
+  }
+  
+  // Validar email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    mostrarError('Ingresa un email válido');
+    document.getElementById('email').classList.add('is-invalid');
+    return;
+  }
+  
+  // Validar contraseña
+  if (password.length < 6) {
+    mostrarError('La contraseña debe tener al menos 6 caracteres');
+    document.getElementById('password').classList.add('is-invalid');
+    return;
+  }
+  
+  // Validar confirmación
+  if (password !== confirmPassword) {
+    mostrarError('Las contraseñas no coinciden');
+    document.getElementById('confirmPassword').classList.add('is-invalid');
+    return;
+  }
+  
+  // Mostrar loading
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const btnText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
+  
+  try {
+    console.log('📤 Enviando datos:', { nombre, email, telefono });
+    
+    const response = await fetch('http://localhost:5500/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nombre,
+        email,
+        telefono,
+        password
+      })
+    });
+    
+    const data = await response.json();
+    console.log('📥 Respuesta:', data);
+    
+    if (data.success) {
+      mostrarExito('¡Registro exitoso! Redirigiendo al login...');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    } else {
+      mostrarError(data.message || 'Error al registrar usuario');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = btnText;
+    }
+    
+  } catch (error) {
+    console.error('❌ Error:', error);
+    mostrarError('Error de conexión con el servidor');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = btnText;
+  }
+});
+
+// =============================================
+// FUNCIONES AUXILIARES
+// =============================================
+function mostrarError(mensaje) {
+  const alertDiv = document.getElementById('alertMessage');
+  alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+  alertDiv.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  alertDiv.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Auto-ocultar después de 5 segundos
+  setTimeout(() => {
+    alertDiv.style.display = 'none';
+  }, 5000);
+}
+
+function mostrarExito(mensaje) {
+  const alertDiv = document.getElementById('alertMessage');
+  alertDiv.className = 'alert alert-success alert-dismissible fade show';
+  alertDiv.innerHTML = `
+    <i class="bi bi-check-circle me-2"></i>${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  alertDiv.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}

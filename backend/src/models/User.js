@@ -29,6 +29,14 @@ console.log('👤 Iniciando creación del modelo User...');
 // =============================================
 
 const userSchema = new mongoose.Schema({
+    password: {
+        type: String,
+        required: function() {
+            return !this.googleId;
+        },
+        minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
+        select: false
+    },
     
     // =============================================
     // INFORMACIÓN BÁSICA Y AUTENTICACIÓN
@@ -127,13 +135,13 @@ const userSchema = new mongoose.Schema({
     
     phone: {
         type: String,
+        required: [true, 'El número de teléfono es obligatorio'],
         trim: true,
         validate: {
-            validator: function(phone) {
-                if (!phone) return true;
-                return /^[\d\s\-\+\(\)]+$/.test(phone);
+            validator: function(v) {
+               return /^[0-9]{10}$/.test(v);
             },
-            message: 'Número de teléfono inválido'
+            message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
         }
     },
     

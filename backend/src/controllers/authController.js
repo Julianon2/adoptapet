@@ -45,17 +45,14 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Hash de la contraseña
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Crear nuevo usuario
+    // Crear nuevo usuario (el password se hasheará automáticamente en el middleware pre-save)
     const newUser = new User({
       name: nombre,
       email: email.toLowerCase(),
-      password: hashedPassword,
+      password: password, // ← Sin hashear - el middleware lo hace
       phone: telefono || undefined,
-      role: 'usuario'
+      role: 'usuario',
+      authProvider: 'local'
     });
 
     await newUser.save();
@@ -105,14 +102,19 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
     if (!user) {
+      console.log('❌ Usuario no encontrado');
       return res.status(401).json({
         success: false,
         message: 'Credenciales inválidas'
       });
     }
 
+    console.log('✅ Usuario encontrado:', email);
+    console.log('🔑 Tiene password?', !!user.password);
+
     // Verificar si el usuario tiene contraseña (puede ser usuario de Google)
     if (!user.password) {
+      console.log('❌ Usuario sin contraseña (Google OAuth)');
       return res.status(401).json({
         success: false,
         message: 'Esta cuenta fue creada con Google. Por favor inicia sesión con Google.'
@@ -120,9 +122,12 @@ exports.login = async (req, res) => {
     }
 
     // Verificar contraseña
+    console.log('🔍 Comparando contraseñas...');
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log('🔑 Contraseña válida?', isValidPassword);
     
     if (!isValidPassword) {
+      console.log('❌ Contraseña incorrecta');
       return res.status(401).json({
         success: false,
         message: 'Credenciales inválidas'

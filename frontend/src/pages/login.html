@@ -65,7 +65,7 @@
     <p id="message" class="text-center mt-4 text-sm"></p>
     
     <!-- Botón de Google -->
-    <a href="http://localhost:3000/auth/google"
+    <a href="http://localhost:5500/auth/google"
        class="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 hover:border-blue-500 transition-all duration-300 font-semibold mt-4">
       <svg class="w-5 h-5" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -85,7 +85,8 @@
 
   <!-- JavaScript para manejar el login -->
   <script>
-    const API_URL = 'http://localhost:3000/api';
+    // ✅ CORREGIDO: Puerto correcto del backend
+    const LOGIN_API_URL = 'http://localhost:3000/api';
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -100,13 +101,15 @@
         password: document.getElementById('password').value
       };
 
+      console.log('📤 Enviando login:', formData.email);
+
       // Mostrar estado de carga
       submitBtn.textContent = 'Iniciando sesión...';
       submitBtn.disabled = true;
       message.textContent = '';
 
       try {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${LOGIN_API_URL}/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -115,14 +118,22 @@
         });
 
         const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
 
-        if (data.success) {
+        if (response.ok && data.success) {
           // Guardar token y usuario en localStorage
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('user', JSON.stringify(data.data.user));
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            console.log('✅ Token guardado');
+          }
+          
+          if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            console.log('✅ Usuario guardado');
+          }
           
           // Mostrar mensaje de éxito
-          message.textContent = `✅ ${data.message}`;
+          message.textContent = `✅ ${data.message || 'Login exitoso'}`;
           message.classList.remove('text-red-500');
           message.classList.add('text-green-600');
           
@@ -132,7 +143,7 @@
           }, 1500);
         } else {
           // Mostrar error
-          message.textContent = '❌ ' + data.message;
+          message.textContent = '❌ ' + (data.message || 'Error en el login');
           message.classList.remove('text-green-600');
           message.classList.add('text-red-500');
           
@@ -140,8 +151,8 @@
           submitBtn.disabled = false;
         }
       } catch (error) {
-        console.error('Error en login:', error);
-        message.textContent = '❌ Error al conectar con el servidor. Verifica que el backend esté corriendo.';
+        console.error('❌ Error en login:', error);
+        message.textContent = '❌ Error al conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5500.';
         message.classList.remove('text-green-600');
         message.classList.add('text-red-500');
         
@@ -152,6 +163,7 @@
 
     // Redirigir si ya está autenticado
     if (localStorage.getItem('token')) {
+      console.log('✅ Usuario ya autenticado, redirigiendo...');
       window.location.href = 'index.html';
     }
   </script>

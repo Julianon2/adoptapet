@@ -1,1 +1,293 @@
-<h1>bjdbjbwjbwbfwwe</h1>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes - AdopaPet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-orange-100">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-gray-900">Configuración</h1>
+            <p class="mt-1 text-sm text-gray-600">Gestiona tu cuenta y preferencias</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <!-- Sidebar -->
+            <div class="lg:w-64">
+                <nav class="bg-white rounded-xl shadow-sm p-2 space-y-1">
+                    <button onclick="showTab('profile')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors bg-orange-500 text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span class="font-medium">Perfil</span>
+                    </button>
+                    
+                    <button onclick="showTab('notifications')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-orange-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span class="font-medium">Notificaciones</span>
+                    </button>
+                    
+                    <button onclick="showTab('security')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-orange-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <span class="font-medium">Seguridad</span>
+                    </button>
+                    
+                    <button onclick="showTab('privacy')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-orange-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        <span class="font-medium">Privacidad</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    
+                    <!-- Profile Tab -->
+                    <div id="profile" class="tab-content">
+                        <div class="space-y-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Información Personal</h2>
+                                <p class="text-gray-600">Actualiza tu información de perfil</p>
+                            </div>
+
+                            <!-- Avatar -->
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-3xl font-bold">
+                                    U
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Usuario Demo</p>
+                                    <p class="text-sm text-gray-600">Miembro desde 2024</p>
+                                    <button class="mt-2 text-sm text-orange-500 hover:text-orange-600 font-medium">
+                                        Cambiar foto
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Form -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                                    <input type="text" value="Usuario Demo" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
+                                    <input type="email" value="usuario@adopapet.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                                    <input type="tel" value="+57 300 123 4567" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+                                    <input type="text" value="Bogotá, Colombia" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <button onclick="saveSettings()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab -->
+                    <div id="notifications" class="tab-content hidden">
+                        <div class="space-y-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Notificaciones</h2>
+                                <p class="text-gray-600">Gestiona cómo quieres recibir notificaciones</p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Nuevas mascotas disponibles</p>
+                                        <p class="text-sm text-gray-600">Notificaciones cuando hay nuevas mascotas</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Mensajes y conversaciones</p>
+                                        <p class="text-sm text-gray-600">Recibe notificaciones de mensajes</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Actualizaciones de adopción</p>
+                                        <p class="text-sm text-gray-600">Estado de tus solicitudes de adopción</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Boletín informativo</p>
+                                        <p class="text-sm text-gray-600">Noticias y consejos sobre mascotas</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button onclick="saveSettings()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                                Guardar preferencias
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div id="security" class="tab-content hidden">
+                        <div class="space-y-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Seguridad</h2>
+                                <p class="text-gray-600">Actualiza tu contraseña y configuración de seguridad</p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña actual</label>
+                                    <input type="password" placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
+                                    <input type="password" placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar nueva contraseña</label>
+                                    <input type="password" placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6">
+                                <h3 class="font-semibold text-gray-900 mb-3">Autenticación de dos factores</h3>
+                                <p class="text-sm text-gray-600 mb-4">Agrega una capa adicional de seguridad a tu cuenta</p>
+                                <button class="px-6 py-2 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-lg font-medium transition-colors">
+                                    Activar 2FA
+                                </button>
+                            </div>
+
+                            <button onclick="saveSettings()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                                Actualizar contraseña
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Tab -->
+                    <div id="privacy" class="tab-content hidden">
+                        <div class="space-y-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Privacidad</h2>
+                                <p class="text-gray-600">Controla quién puede ver tu información</p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Perfil público</p>
+                                        <p class="text-sm text-gray-600">Permite que otros usuarios vean tu perfil</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Mostrar teléfono</p>
+                                        <p class="text-sm text-gray-600">Visible para refugios y adoptantes</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Mostrar ubicación exacta</p>
+                                        <p class="text-sm text-gray-600">Muestra solo la ciudad si está desactivado</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6">
+                                <h3 class="font-semibold text-gray-900 mb-3 text-red-600">Zona de peligro</h3>
+                                <button class="px-6 py-2 border-2 border-red-500 text-red-500 hover:bg-red-50 rounded-lg font-medium transition-colors">
+                                    Eliminar cuenta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-orange-500', 'text-white');
+                btn.classList.add('text-gray-700', 'hover:bg-orange-50');
+            });
+            
+            // Mostrar contenido seleccionado
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            // Activar botón seleccionado
+            event.target.closest('.tab-btn').classList.add('bg-orange-500', 'text-white');
+            event.target.closest('.tab-btn').classList.remove('text-gray-700', 'hover:bg-orange-50');
+        }
+
+        function saveSettings() {
+            alert('¡Configuración guardada exitosamente! 🐾');
+        }
+    </script>
+</body>
+</html>

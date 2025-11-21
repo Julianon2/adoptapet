@@ -6,472 +6,519 @@
     <title>Adoptar - AdoptaPet</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen">
     
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-cyan-500 to-cyan-600 shadow-lg">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <a href="index.html" class="text-3xl font-bold text-white tracking-tight">
-                    🐾 ADOPTAPET
-                </a>
-                <ul class="hidden md:flex space-x-8">
-                    <li><a href="index.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Inicio</a></li>
-                    <li><a href="adoptar.html" class="text-white font-medium underline hover:-translate-y-1 transition-transform duration-300 inline-block">Adoptar</a></li>
-                    <li><a href="perfil.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Perfil</a></li>
-                    <li><a href="notificaciones.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Notificaciones</a></li>
-                   
-                    <li><a href="ajustes.html" class="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Ajustes</a></li>
-                </ul>
-                <button class="md:hidden text-white" id="mobile-menu-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-        </nav>
-    </header>
+<!-- Header Superior -->
+<header class="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-500 via-purple-500 to-purple-600 shadow-lg z-50 flex items-center px-6">
+    <div class="flex items-center gap-3">
+        <span class="text-3xl">🐾</span>
+        <h1 class="text-2xl font-bold text-white">AdoptaPet</h1>
+    </div>
+    
+    <div class="flex-1 max-w-2xl mx-auto px-6">
+        <div class="relative">
+            <input type="text" 
+                   placeholder="Buscar mascotas, refugios..." 
+                   class="w-full px-4 py-2 rounded-full border-none outline-none text-gray-700 shadow-md">
+            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500">
+                🔍
+            </button>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-4">
+        <button class="text-white hover:bg-white/20 rounded-full p-2 transition">
+            💬
+        </button>
+        <button class="text-white hover:bg-white/20 rounded-full p-2 relative transition">
+            🔔
+            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</span>
+        </button>
+        <button class="flex items-center gap-2 bg-white/20 hover:bg-white/30 rounded-full px-4 py-2 text-white transition">
+            <div class="w-8 h-8 bg-white rounded-full"></div>
+            <span class="font-medium">Nombre de Usuario</span>
+        </button>
+    </div>
+</header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+<!-- Sidebar -->
+<aside class="w-64 bg-white h-screen shadow-xl fixed left-0 top-16 p-6 flex flex-col">
+    <nav class="flex flex-col space-y-3">
+        <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl 
+            hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white 
+            transition font-medium text-gray-700">
+            🏠 Inicio
+        </a>
+
+        <a href="adoptar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl 
+            bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-md transition">
+            🐶 Adoptar
+        </a>
+
+        <a href="publicar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl 
+            hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white 
+            transition font-medium text-gray-700">
+            📝 Publicar
+        </a>
+
+        <a href="amigos.html" class="flex items-center gap-3 px-4 py-3 rounded-xl 
+            hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white 
+            transition font-medium text-gray-700">
+            👥 Amigos
+        </a>
+
+        <a href="ajustes.html" class="flex items-center gap-3 px-4 py-3 rounded-xl 
+            hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white 
+            transition font-medium text-gray-700">
+            ⚙️ Ajustes
+        </a>
+    </nav>
+
+    <div class="mt-10">
+        <h2 class="text-sm font-bold text-gray-500 mb-3">CATEGORÍAS</h2>
+        <div class="flex flex-col gap-2">
+            <button class="flex items-center gap-2 text-left px-2 py-1 text-gray-700 hover:text-purple-600 transition">🐕 Perros</button>
+            <button class="flex items-center gap-2 text-left px-2 py-1 text-gray-700 hover:text-purple-600 transition">🐈 Gatos</button>
+            <button class="flex items-center gap-2 text-left px-2 py-1 text-gray-700 hover:text-purple-600 transition">🐰 Otros</button>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-64 mt-16 flex-1 px-6 py-8 max-w-[1600px]">
+    <!-- Header Section -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">🐾 Encuentra tu compañero perfecto</h1>
+        <p class="text-base text-gray-600">Cada mascota merece un hogar lleno de amor. ¡Adopta y cambia una vida!</p>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">🔍 Filtrar búsqueda</h2>
         
-        <!-- Header Section -->
-        <div class="mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-3">🐾 Encuentra tu compañero perfecto</h1>
-            <p class="text-lg text-gray-600">Cada mascota merece un hogar lleno de amor. ¡Adopta y cambia una vida!</p>
-        </div>
-
-        <!-- Filters Section -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">🔍 Filtrar búsqueda</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Tipo de mascota -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de mascota</label>
-                    <select id="filterType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none">
-                        <option value="all">Todas</option>
-                        <option value="dog">Perros 🐕</option>
-                        <option value="cat">Gatos 🐱</option>
-                        <option value="other">Otros 🐰</option>
-                    </select>
-                </div>
-
-                <!-- Tamaño -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tamaño</label>
-                    <select id="filterSize" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none">
-                        <option value="all">Todos</option>
-                        <option value="small">Pequeño</option>
-                        <option value="medium">Mediano</option>
-                        <option value="large">Grande</option>
-                    </select>
-                </div>
-
-                <!-- Edad -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
-                    <select id="filterAge" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none">
-                        <option value="all">Todas</option>
-                        <option value="puppy">Cachorro</option>
-                        <option value="young">Joven</option>
-                        <option value="adult">Adulto</option>
-                        <option value="senior">Senior</option>
-                    </select>
-                </div>
-
-                <!-- Botón de búsqueda -->
-                <div class="flex items-end">
-                    <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300 hover:shadow-lg">
-                        Buscar
-                    </button>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Tipo de mascota -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de mascota</label>
+                <select id="filterType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none">
+                    <option value="all">Todas</option>
+                    <option value="dog">Perros 🐕</option>
+                    <option value="cat">Gatos 🐱</option>
+                    <option value="other">Otros 🐰</option>
+                </select>
             </div>
-        </div>
 
-      
+            <!-- Tamaño -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Tamaño</label>
+                <select id="filterSize" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none">
+                    <option value="all">Todos</option>
+                    <option value="small">Pequeño</option>
+                    <option value="medium">Mediano</option>
+                    <option value="large">Grande</option>
+                </select>
+            </div>
 
-        <!-- Pets Grid -->
-        <div id="petsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Las mascotas se cargarán aquí dinámicamente -->
-        </div>
+            <!-- Edad -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
+                <select id="filterAge" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none">
+                    <option value="all">Todas</option>
+                    <option value="puppy">Cachorro</option>
+                    <option value="young">Joven</option>
+                    <option value="adult">Adulto</option>
+                    <option value="senior">Senior</option>
+                </select>
+            </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-16">
-            <div class="text-6xl mb-4">🔍</div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">No se encontraron mascotas</h3>
-            <p class="text-gray-600">Intenta ajustar los filtros de búsqueda</p>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 text-center mt-auto w-full">
-        <p>&copy; 2025 AdoptaPet. Todos los derechos reservados. Hecho con ❤️ para las mascotas.</p>
-    </footer>
-
-    <!-- Modal de detalle de mascota -->
-    <div id="petModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="relative">
-                <img id="modalImage" src="" alt="Mascota" class="w-full h-64 object-cover rounded-t-2xl">
-                <button onclick="closeModal()" class="absolute top-4 right-4 bg-white text-gray-800 rounded-full p-2 hover:bg-gray-100 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+            <!-- Botón de búsqueda -->
+            <div class="flex items-end">
+                <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 hover:shadow-lg">
+                    Buscar
                 </button>
-            </div>
-            
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 id="modalName" class="text-3xl font-bold text-gray-800 mb-2"></h2>
-                        <div class="flex gap-2 flex-wrap">
-                            <span id="modalType" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold"></span>
-                            <span id="modalSize" class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-semibold"></span>
-                            <span id="modalAge" class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm font-semibold"></span>
-                        </div>
-                    </div>
-                    <button onclick="toggleFavorite()" id="btnFavorite" class="text-3xl hover:scale-110 transition-transform">
-                        ❤️
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">📝 Descripción</h3>
-                        <p id="modalDescription" class="text-gray-600"></p>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">✨ Características</h3>
-                        <div id="modalFeatures" class="grid grid-cols-2 gap-2"></div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">📍 Ubicación</h3>
-                        <p id="modalLocation" class="text-gray-600"></p>
-                    </div>
-
-                    <div class="flex gap-3 pt-4">
-                        <button onclick="adoptPet()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all hover:shadow-lg">
-                            💚 Solicitar Adopción
-                        </button>
-                        <button onclick="contactOwner()" class="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-cyan-700 transition-all hover:shadow-lg">
-                            💬 Contactar
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Datos de ejemplo de mascotas
-        let pets = [
-            {
-                id: 1,
-                name: 'Luna',
-                type: 'dog',
-                typeName: 'Perro 🐕',
-                breed: 'Labrador',
-                age: 'young',
-                ageName: '2 años',
-                size: 'large',
-                sizeName: 'Grande',
-                gender: 'Hembra',
-                image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500',
-                description: 'Luna es una perra muy cariñosa y juguetona. Le encanta correr en el parque y es excelente con niños. Está vacunada y esterilizada.',
-                features: ['Vacunada', 'Esterilizada', 'Sociable', 'Entrenada'],
-                location: 'Bogotá, Colombia',
-                favorite: false
-            },
-            {
-                id: 2,
-                name: 'Max',
-                type: 'dog',
-                typeName: 'Perro 🐕',
-                breed: 'Golden Retriever',
-                age: 'puppy',
-                ageName: '6 meses',
-                size: 'medium',
-                sizeName: 'Mediano',
-                gender: 'Macho',
-                image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=500',
-                description: 'Max es un cachorro lleno de energía. Busca una familia activa que pueda darle todo el amor y atención que necesita.',
-                features: ['Vacunado', 'Juguetón', 'Energético', 'Saludable'],
-                location: 'Medellín, Colombia',
-                favorite: false
-            },
-            {
-                id: 3,
-                name: 'Michi',
-                type: 'cat',
-                typeName: 'Gato 🐱',
-                breed: 'Siamés',
-                age: 'adult',
-                ageName: '3 años',
-                size: 'small',
-                sizeName: 'Pequeño',
-                gender: 'Macho',
-                image: 'https://images.unsplash.com/photo-1573865526739-10c1d3a3e90e?w=500',
-                description: 'Michi es un gato tranquilo e independiente. Perfecto para apartamentos y personas que buscan compañía silenciosa.',
-                features: ['Vacunado', 'Esterilizado', 'Tranquilo', 'Limpio'],
-                location: 'Cali, Colombia',
-                favorite: false
-            },
-            {
-                id: 4,
-                name: 'Bella',
-                type: 'dog',
-                typeName: 'Perro 🐕',
-                breed: 'Beagle',
-                age: 'young',
-                ageName: '1 año',
-                size: 'small',
-                sizeName: 'Pequeño',
-                gender: 'Hembra',
-                image: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=500',
-                description: 'Bella es pequeña pero con mucha personalidad. Le encanta explorar y es muy curiosa. Ideal para familias.',
-                features: ['Vacunada', 'Esterilizada', 'Curiosa', 'Amigable'],
-                location: 'Bogotá, Colombia',
-                favorite: false
-            },
-            {
-                id: 5,
-                name: 'Pelusa',
-                type: 'cat',
-                typeName: 'Gato 🐱',
-                breed: 'Persa',
-                age: 'young',
-                ageName: '1.5 años',
-                size: 'small',
-                sizeName: 'Pequeño',
-                gender: 'Hembra',
-                image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=500',
-                description: 'Pelusa es una gatita muy cariñosa que ama los mimos. Su pelaje suave necesita cepillado regular.',
-                features: ['Vacunada', 'Esterilizada', 'Cariñosa', 'Tranquila'],
-                location: 'Barranquilla, Colombia',
-                favorite: false
-            },
-            {
-                id: 6,
-                name: 'Rocky',
-                type: 'dog',
-                typeName: 'Perro 🐕',
-                breed: 'Bulldog',
-                age: 'adult',
-                ageName: '4 años',
-                size: 'medium',
-                sizeName: 'Mediano',
-                gender: 'Macho',
-                image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500',
-                description: 'Rocky es un perro tranquilo y leal. Perfecto para hogares con espacio moderado. Muy protector con su familia.',
-                features: ['Vacunado', 'Esterilizado', 'Leal', 'Protector'],
-                location: 'Cartagena, Colombia',
-                favorite: false
-            }
-        ];
+    <!-- Pets Grid -->
+    <div id="petsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- Las mascotas se cargarán aquí dinámicamente -->
+    </div>
 
-        let currentPet = null;
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">No se encontraron mascotas</h3>
+        <p class="text-gray-600">Intenta ajustar los filtros de búsqueda</p>
+    </div>
+</main>
 
-        // Cargar mascotas al iniciar
-        window.addEventListener('DOMContentLoaded', () => {
-            loadFavorites();
-            renderPets(pets);
-        });
-
-        // Renderizar mascotas
-        function renderPets(petsToRender) {
-            const container = document.getElementById('petsContainer');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (petsToRender.length === 0) {
-                container.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            container.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-
-            container.innerHTML = petsToRender.map(pet => `
-                <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-2">
-                    <div class="relative overflow-hidden">
-                        <img src="${pet.image}" 
-                             alt="${pet.name}" 
-                             class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                             onclick="openPetModal(${pet.id})">
-                        <button onclick="togglePetFavorite(${pet.id}, event)" 
-                                class="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:scale-110 transition-transform">
-                            <span class="text-2xl">${pet.favorite ? '❤️' : '🤍'}</span>
-                        </button>
-                    </div>
-                    
-                    <div class="p-6" onclick="openPetModal(${pet.id})">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-800 mb-1">${pet.name}</h3>
-                                <p class="text-gray-600 text-sm">${pet.breed}</p>
-                            </div>
-                            <span class="text-3xl">${pet.type === 'dog' ? '🐕' : '🐱'}</span>
-                        </div>
-                        
-                        <div class="flex gap-2 mb-4 flex-wrap">
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">${pet.ageName}</span>
-                            <span class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs font-semibold">${pet.sizeName}</span>
-                            <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-semibold">${pet.gender}</span>
-                        </div>
-                        
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${pet.description}</p>
-                        
-                        <div class="flex gap-2">
-                            <button onclick="quickAdopt(${pet.id}, event)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all text-sm">
-                                Adoptar
-                            </button>
-                            <button onclick="openPetModal(${pet.id}, event)" class="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white py-2 rounded-lg font-semibold hover:from-cyan-600 hover:to-cyan-700 transition-all text-sm">
-                                Ver más
-                            </button>
-                        </div>
+<!-- Modal de detalle de mascota -->
+<div id="petModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="relative">
+            <img id="modalImage" src="" alt="Mascota" class="w-full h-64 object-cover rounded-t-2xl">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-white text-gray-800 rounded-full p-2 hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="modalName" class="text-3xl font-bold text-gray-800 mb-2"></h2>
+                    <div class="flex gap-2 flex-wrap">
+                        <span id="modalType" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold"></span>
+                        <span id="modalSize" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold"></span>
+                        <span id="modalAge" class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm font-semibold"></span>
                     </div>
                 </div>
-            `).join('');
+                <button onclick="toggleFavorite()" id="btnFavorite" class="text-3xl hover:scale-110 transition-transform">
+                    ❤️
+                </button>
+            </div>
 
-            document.getElementById('totalPets').textContent = petsToRender.length;
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">📝 Descripción</h3>
+                    <p id="modalDescription" class="text-gray-600"></p>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">✨ Características</h3>
+                    <div id="modalFeatures" class="grid grid-cols-2 gap-2"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">📍 Ubicación</h3>
+                    <p id="modalLocation" class="text-gray-600"></p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="adoptPet()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all hover:shadow-lg">
+                        💚 Solicitar Adopción
+                    </button>
+                    <button onclick="contactOwner()" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all hover:shadow-lg">
+                        💬 Contactar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Datos de ejemplo de mascotas
+    let pets = [
+        {
+            id: 1,
+            name: 'Luna',
+            type: 'dog',
+            typeName: 'Perro 🐕',
+            breed: 'Labrador',
+            age: 'young',
+            ageName: '2 años',
+            size: 'large',
+            sizeName: 'Grande',
+            gender: 'Hembra',
+            image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500',
+            description: 'Luna es una perra muy cariñosa y juguetona. Le encanta correr en el parque y es excelente con niños. Está vacunada y esterilizada.',
+            features: ['Vacunada', 'Esterilizada', 'Sociable', 'Entrenada'],
+            location: 'Bogotá, Colombia',
+            favorite: false
+        },
+        {
+            id: 2,
+            name: 'Max',
+            type: 'dog',
+            typeName: 'Perro 🐕',
+            breed: 'Golden Retriever',
+            age: 'puppy',
+            ageName: '6 meses',
+            size: 'medium',
+            sizeName: 'Mediano',
+            gender: 'Macho',
+            image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=500',
+            description: 'Max es un cachorro lleno de energía. Busca una familia activa que pueda darle todo el amor y atención que necesita.',
+            features: ['Vacunado', 'Juguetón', 'Energético', 'Saludable'],
+            location: 'Medellín, Colombia',
+            favorite: false
+        },
+        {
+            id: 3,
+            name: 'Michi',
+            type: 'cat',
+            typeName: 'Gato 🐱',
+            breed: 'Siamés',
+            age: 'adult',
+            ageName: '3 años',
+            size: 'small',
+            sizeName: 'Pequeño',
+            gender: 'Macho',
+            image: 'https://images.unsplash.com/photo-1573865526739-10c1d3a3e90e?w=500',
+            description: 'Michi es un gato tranquilo e independiente. Perfecto para apartamentos y personas que buscan compañía silenciosa.',
+            features: ['Vacunado', 'Esterilizado', 'Tranquilo', 'Limpio'],
+            location: 'Cali, Colombia',
+            favorite: false
+        },
+        {
+            id: 4,
+            name: 'Bella',
+            type: 'dog',
+            typeName: 'Perro 🐕',
+            breed: 'Beagle',
+            age: 'young',
+            ageName: '1 año',
+            size: 'small',
+            sizeName: 'Pequeño',
+            gender: 'Hembra',
+            image: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=500',
+            description: 'Bella es pequeña pero con mucha personalidad. Le encanta explorar y es muy curiosa. Ideal para familias.',
+            features: ['Vacunada', 'Esterilizada', 'Curiosa', 'Amigable'],
+            location: 'Bogotá, Colombia',
+            favorite: false
+        },
+        {
+            id: 5,
+            name: 'Pelusa',
+            type: 'cat',
+            typeName: 'Gato 🐱',
+            breed: 'Persa',
+            age: 'young',
+            ageName: '1.5 años',
+            size: 'small',
+            sizeName: 'Pequeño',
+            gender: 'Hembra',
+            image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=500',
+            description: 'Pelusa es una gatita muy cariñosa que ama los mimos. Su pelaje suave necesita cepillado regular.',
+            features: ['Vacunada', 'Esterilizada', 'Cariñosa', 'Tranquila'],
+            location: 'Barranquilla, Colombia',
+            favorite: false
+        },
+        {
+            id: 6,
+            name: 'Rocky',
+            type: 'dog',
+            typeName: 'Perro 🐕',
+            breed: 'Bulldog',
+            age: 'adult',
+            ageName: '4 años',
+            size: 'medium',
+            sizeName: 'Mediano',
+            gender: 'Macho',
+            image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500',
+            description: 'Rocky es un perro tranquilo y leal. Perfecto para hogares con espacio moderado. Muy protector con su familia.',
+            features: ['Vacunado', 'Esterilizado', 'Leal', 'Protector'],
+            location: 'Cartagena, Colombia',
+            favorite: false
+        }
+    ];
+
+    let currentPet = null;
+
+    // Cargar mascotas al iniciar
+    window.addEventListener('DOMContentLoaded', () => {
+        loadFavorites();
+        renderPets(pets);
+    });
+
+    // Renderizar mascotas
+    function renderPets(petsToRender) {
+        const container = document.getElementById('petsContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (petsToRender.length === 0) {
+            container.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
         }
 
-        // Aplicar filtros
-        function applyFilters() {
-            const type = document.getElementById('filterType').value;
-            const size = document.getElementById('filterSize').value;
-            const age = document.getElementById('filterAge').value;
+        container.classList.remove('hidden');
+        emptyState.classList.add('hidden');
 
-            let filtered = pets;
+        container.innerHTML = petsToRender.map(pet => `
+            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-1">
+                <div class="relative overflow-hidden">
+                    <img src="${pet.image}" 
+                         alt="${pet.name}" 
+                         class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                         onclick="openPetModal(${pet.id})">
+                    <button onclick="togglePetFavorite(${pet.id}, event)" 
+                            class="absolute top-3 right-3 bg-white rounded-full p-1.5 shadow-lg hover:scale-110 transition-transform">
+                        <span class="text-xl">${pet.favorite ? '❤️' : '🤍'}</span>
+                    </button>
+                </div>
+                
+                <div class="p-4" onclick="openPetModal(${pet.id})">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-0.5">${pet.name}</h3>
+                            <p class="text-gray-600 text-xs">${pet.breed}</p>
+                        </div>
+                        <span class="text-2xl">${pet.type === 'dog' ? '🐕' : '🐱'}</span>
+                    </div>
+                    
+                    <div class="flex gap-1.5 mb-3 flex-wrap">
+                        <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">${pet.ageName}</span>
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">${pet.sizeName}</span>
+                        <span class="px-2 py-0.5 bg-pink-100 text-pink-700 rounded-full text-xs font-semibold">${pet.gender}</span>
+                    </div>
+                    
+                    <p class="text-gray-600 text-xs mb-3 line-clamp-2">${pet.description}</p>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="quickAdopt(${pet.id}, event)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all text-xs">
+                            Adoptar
+                        </button>
+                        <button onclick="openPetModal(${pet.id}, event)" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all text-xs">
+                            Ver más
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
 
-            if (type !== 'all') {
-                filtered = filtered.filter(pet => pet.type === type);
-            }
+    // Aplicar filtros
+    function applyFilters() {
+        const type = document.getElementById('filterType').value;
+        const size = document.getElementById('filterSize').value;
+        const age = document.getElementById('filterAge').value;
 
-            if (size !== 'all') {
-                filtered = filtered.filter(pet => pet.size === size);
-            }
+        let filtered = pets;
 
-            if (age !== 'all') {
-                filtered = filtered.filter(pet => pet.age === age);
-            }
-
-            renderPets(filtered);
+        if (type !== 'all') {
+            filtered = filtered.filter(pet => pet.type === type);
         }
 
-        // Abrir modal de mascota
-        function openPetModal(id, event) {
-            if (event) event.stopPropagation();
-            
-            const pet = pets.find(p => p.id === id);
-            if (!pet) return;
-
-            currentPet = pet;
-
-            document.getElementById('modalImage').src = pet.image;
-            document.getElementById('modalName').textContent = pet.name;
-            document.getElementById('modalType').textContent = pet.typeName;
-            document.getElementById('modalSize').textContent = pet.sizeName;
-            document.getElementById('modalAge').textContent = pet.ageName;
-            document.getElementById('modalDescription').textContent = pet.description;
-            document.getElementById('modalLocation').textContent = pet.location;
-            document.getElementById('btnFavorite').textContent = pet.favorite ? '❤️' : '🤍';
-
-            const featuresHtml = pet.features.map(f => 
-                `<div class="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-700">✓ ${f}</div>`
-            ).join('');
-            document.getElementById('modalFeatures').innerHTML = featuresHtml;
-
-            document.getElementById('petModal').classList.remove('hidden');
+        if (size !== 'all') {
+            filtered = filtered.filter(pet => pet.size === size);
         }
 
-        // Cerrar modal
-        function closeModal() {
-            document.getElementById('petModal').classList.add('hidden');
-            currentPet = null;
+        if (age !== 'all') {
+            filtered = filtered.filter(pet => pet.age === age);
         }
 
-        // Toggle favorito desde el modal
-        function toggleFavorite() {
-            if (!currentPet) return;
-            
-            currentPet.favorite = !currentPet.favorite;
-            document.getElementById('btnFavorite').textContent = currentPet.favorite ? '❤️' : '🤍';
-            saveFavorites();
-            renderPets(pets);
-            showToast(currentPet.favorite ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos');
+        renderPets(filtered);
+    }
+
+    // Abrir modal de mascota
+    function openPetModal(id, event) {
+        if (event) event.stopPropagation();
+        
+        const pet = pets.find(p => p.id === id);
+        if (!pet) return;
+
+        currentPet = pet;
+
+        document.getElementById('modalImage').src = pet.image;
+        document.getElementById('modalName').textContent = pet.name;
+        document.getElementById('modalType').textContent = pet.typeName;
+        document.getElementById('modalSize').textContent = pet.sizeName;
+        document.getElementById('modalAge').textContent = pet.ageName;
+        document.getElementById('modalDescription').textContent = pet.description;
+        document.getElementById('modalLocation').textContent = pet.location;
+        document.getElementById('btnFavorite').textContent = pet.favorite ? '❤️' : '🤍';
+
+        const featuresHtml = pet.features.map(f => 
+            `<div class="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-700">✓ ${f}</div>`
+        ).join('');
+        document.getElementById('modalFeatures').innerHTML = featuresHtml;
+
+        document.getElementById('petModal').classList.remove('hidden');
+    }
+
+    // Cerrar modal
+    function closeModal() {
+        document.getElementById('petModal').classList.add('hidden');
+        currentPet = null;
+    }
+
+    // Toggle favorito desde el modal
+    function toggleFavorite() {
+        if (!currentPet) return;
+        
+        currentPet.favorite = !currentPet.favorite;
+        document.getElementById('btnFavorite').textContent = currentPet.favorite ? '❤️' : '🤍';
+        saveFavorites();
+        renderPets(pets);
+        showToast(currentPet.favorite ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos');
+    }
+
+    // Toggle favorito desde la tarjeta
+    function togglePetFavorite(id, event) {
+        event.stopPropagation();
+        
+        const pet = pets.find(p => p.id === id);
+        if (!pet) return;
+
+        pet.favorite = !pet.favorite;
+        saveFavorites();
+        renderPets(pets);
+        showToast(pet.favorite ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos');
+    }
+
+    // Adopción rápida
+    function quickAdopt(id, event) {
+        event.stopPropagation();
+        adoptPet(id);
+    }
+
+    // Solicitar adopción
+    function adoptPet(id) {
+        const petId = id || (currentPet ? currentPet.id : null);
+        if (!petId) return;
+
+        const pet = pets.find(p => p.id === petId);
+        if (!pet) return;
+
+        showToast(`✅ Solicitud de adopción enviada para ${pet.name}`);
+        if (currentPet) closeModal();
+    }
+
+    // Contactar dueño
+    function contactOwner() {
+        if (!currentPet) return;
+        showToast(`💬 Abriendo chat con el dueño de ${currentPet.name}`);
+        closeModal();
+    }
+
+    // Guardar favoritos
+    function saveFavorites() {
+        const favorites = pets.filter(p => p.favorite).map(p => p.id);
+        const favoritesData = JSON.stringify(favorites);
+        try {
+            const tempStorage = {};
+            tempStorage['favorites'] = favoritesData;
+        } catch(e) {
+            console.log('Storage not available');
         }
+    }
 
-        // Toggle favorito desde la tarjeta
-        function togglePetFavorite(id, event) {
-            event.stopPropagation();
-            
-            const pet = pets.find(p => p.id === id);
-            if (!pet) return;
-
-            pet.favorite = !pet.favorite;
-            saveFavorites();
-            renderPets(pets);
-            showToast(pet.favorite ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos');
-        }
-
-        // Adopción rápida
-        function quickAdopt(id, event) {
-            event.stopPropagation();
-            adoptPet(id);
-        }
-
-        // Solicitar adopción
-        function adoptPet(id) {
-            const petId = id || (currentPet ? currentPet.id : null);
-            if (!petId) return;
-
-            const pet = pets.find(p => p.id === petId);
-            if (!pet) return;
-
-            showToast(`✅ Solicitud de adopción enviada para ${pet.name}`);
-            if (currentPet) closeModal();
-        }
-
-        // Contactar dueño
-        function contactOwner() {
-            if (!currentPet) return;
-            showToast(`💬 Abriendo chat con el dueño de ${currentPet.name}`);
-            closeModal();
-        }
-
-        // Guardar favoritos
-        function saveFavorites() {
-            const favorites = pets.filter(p => p.favorite).map(p => p.id);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-        }
-
-        // Cargar favoritos
-        function loadFavorites() {
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    // Cargar favoritos
+    function loadFavorites() {
+        try {
+            const tempStorage = {};
+            const favorites = JSON.parse(tempStorage['favorites'] || '[]');
             pets.forEach(pet => {
                 pet.favorite = favorites.includes(pet.id);
             });
+        } catch(e) {
+            console.log('Storage not available');
         }
+    }
 
-        // Mostrar toast
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Mobile menu
-        document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
-            alert('Menú móvil - Agrega la lógica según necesites');
-        });
-    </script>
+    // Mostrar toast
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-20 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
 </body>
 </html>

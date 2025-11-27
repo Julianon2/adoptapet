@@ -1,4 +1,6 @@
-export default function RightSidebar() {
+import React from 'react';
+
+function RightSidebar() {
   return (
     <aside className="hidden md:block md:col-span-3 space-y-4">
       
@@ -56,3 +58,5 @@ export default function RightSidebar() {
     </aside>
   );
 }
+
+export default RightSidebar;

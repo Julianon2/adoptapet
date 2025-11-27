@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-function PostModal({ isOpen, onClose }) {
+export default function PostModal({ isOpen, onClose }) {
   const [postText, setPostText] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
-
-  if (!isOpen) return null;
+  const [petInfo, setPetInfo] = useState({
+    name: '',
+    type: '',
+    breed: '',
+    age: '',
+    forAdoption: false
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.onload = (event) => {
+        setImagePreview(event.target.result);
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -19,24 +26,29 @@ function PostModal({ isOpen, onClose }) {
     setImagePreview(null);
   };
 
-  const handlePublish = () => {
+  const publishPost = () => {
     if (!postText.trim() && !imagePreview) {
-      alert('⚠️ Por favor escribe algo o agrega una imagen');
+      alert('Por favor escribe algo o agrega una imagen');
       return;
     }
-    alert('✅ ¡Publicación creada exitosamente!');
+    
+    alert('¡Publicación creada exitosamente!');
+    // Limpiar formulario
     setPostText('');
     setImagePreview(null);
+    setPetInfo({ name: '', type: '', breed: '', age: '', forAdoption: false });
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-0 md:p-4 modal-overlay"
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-0 md:p-4 animate-fadeIn"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto modal-content"
+        className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -95,9 +107,19 @@ function PostModal({ isOpen, onClose }) {
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-              <input type="text" placeholder="Nombre de la mascota" className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base" />
+              <input 
+                type="text" 
+                placeholder="Nombre de la mascota" 
+                value={petInfo.name}
+                onChange={(e) => setPetInfo({...petInfo, name: e.target.value})}
+                className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base"
+              />
               
-              <select className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base">
+              <select 
+                value={petInfo.type}
+                onChange={(e) => setPetInfo({...petInfo, type: e.target.value})}
+                className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base"
+              >
                 <option value="">Tipo de mascota</option>
                 <option>🐕 Perro</option>
                 <option>🐈 Gato</option>
@@ -106,13 +128,31 @@ function PostModal({ isOpen, onClose }) {
                 <option>🐹 Otro</option>
               </select>
               
-              <input type="text" placeholder="Raza" className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base" />
+              <input 
+                type="text" 
+                placeholder="Raza" 
+                value={petInfo.breed}
+                onChange={(e) => setPetInfo({...petInfo, breed: e.target.value})}
+                className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base"
+              />
               
-              <input type="text" placeholder="Edad" className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base" />
+              <input 
+                type="text" 
+                placeholder="Edad" 
+                value={petInfo.age}
+                onChange={(e) => setPetInfo({...petInfo, age: e.target.value})}
+                className="px-3 md:px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base"
+              />
             </div>
 
             <div className="mt-3 flex items-center gap-2">
-              <input type="checkbox" id="forAdoption" className="w-4 h-4 text-purple-600 rounded" />
+              <input 
+                type="checkbox" 
+                id="forAdoption" 
+                checked={petInfo.forAdoption}
+                onChange={(e) => setPetInfo({...petInfo, forAdoption: e.target.checked})}
+                className="w-4 h-4 text-purple-600 rounded"
+              />
               <label htmlFor="forAdoption" className="text-xs md:text-sm text-gray-700">Está disponible para adopción</label>
             </div>
           </div>
@@ -123,7 +163,12 @@ function PostModal({ isOpen, onClose }) {
             
             <div className="flex flex-wrap gap-2">
               <label className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gray-50 hover:bg-purple-50 active:bg-purple-50 rounded-lg cursor-pointer transition border border-gray-200 hover:border-purple-300">
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleImageChange}
+                />
                 <span className="text-lg md:text-xl">📸</span>
                 <span className="text-xs md:text-sm font-medium">Foto/Video</span>
               </label>
@@ -140,7 +185,7 @@ function PostModal({ isOpen, onClose }) {
         {/* Footer del Modal */}
         <div className="sticky bottom-0 bg-gray-50 px-4 md:px-6 py-3 md:py-4 rounded-b-3xl md:rounded-b-2xl">
           <button 
-            onClick={handlePublish}
+            onClick={publishPost}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 rounded-xl hover:from-purple-600 hover:to-pink-600 active:from-purple-600 active:to-pink-600 transition-all shadow-lg hover:shadow-xl"
           >
             Publicar
@@ -151,5 +196,3 @@ function PostModal({ isOpen, onClose }) {
     </div>
   );
 }
-
-export default PostModal;

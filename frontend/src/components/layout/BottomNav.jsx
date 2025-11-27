@@ -1,7 +1,6 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-function BottomNav({ onOpenModal }) {
+export default function BottomNav({ onOpenModal }) {
   const location = useLocation();
 
   return (
@@ -9,7 +8,9 @@ function BottomNav({ onOpenModal }) {
       <div className="flex justify-around items-center py-2">
         <Link 
           to="/" 
-          className={`flex flex-col items-center gap-1 px-4 py-2 active:scale-95 transition ${location.pathname === '/' ? 'text-purple-600' : 'text-gray-500'}`}
+          className={`flex flex-col items-center gap-1 px-4 py-2 active:scale-95 transition ${
+            location.pathname === '/' ? 'text-purple-600' : 'text-gray-500'
+          }`}
         >
           <span className="text-2xl">🏠</span>
           <span className="text-xs font-medium">Inicio</span>
@@ -17,7 +18,9 @@ function BottomNav({ onOpenModal }) {
         
         <Link 
           to="/adoptar" 
-          className={`flex flex-col items-center gap-1 px-4 py-2 active:scale-95 transition ${location.pathname === '/adoptar' ? 'text-purple-600' : 'text-gray-500 active:text-purple-600'}`}
+          className={`flex flex-col items-center gap-1 px-4 py-2 active:scale-95 transition ${
+            location.pathname === '/adoptar' ? 'text-purple-600' : 'text-gray-500'
+          }`}
         >
           <span className="text-2xl">🐕</span>
           <span className="text-xs font-medium">Adoptar</span>
@@ -32,7 +35,7 @@ function BottomNav({ onOpenModal }) {
         </button>
         
         <Link 
-          to="/amigos" 
+          to="/amigos"
           className="flex flex-col items-center gap-1 px-4 py-2 text-gray-500 active:text-purple-600 active:scale-95 transition"
         >
           <span className="text-2xl">👥</span>
@@ -40,7 +43,7 @@ function BottomNav({ onOpenModal }) {
         </Link>
         
         <Link 
-          to="/ajustes" 
+          to="/ajustes"
           className="flex flex-col items-center gap-1 px-4 py-2 text-gray-500 active:text-purple-600 active:scale-95 transition"
         >
           <span className="text-2xl">⚙️</span>
@@ -50,5 +53,3 @@ function BottomNav({ onOpenModal }) {
     </nav>
   );
 }
-
-export default BottomNav;

@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
 const allowedOrigins = process.env.FRONTEND_URL
   ? [process.env.FRONTEND_URL]
   : [
-      'http://localhost:5500',      // React
+      'http://localhost:5000',      // React
       'http://127.0.0.1:5000',      // Live Server
       'http://localhost:8080',      // Webpack
       'http://localhost:5173',      // Vite

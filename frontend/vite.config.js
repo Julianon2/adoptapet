@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    open: '../frontend/src/pages/registro.jsx'
+    open: '../frontend/src/pages/Registro.jsx'
   }
 })

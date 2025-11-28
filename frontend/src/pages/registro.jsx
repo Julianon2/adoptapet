@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Check } from 'lucide-react';
 
-const API_URL = 'http://localhost:5500/api';
+const API_URL = 'http://localhost:5000/api';
 
 const testConnection = async () => {
   try {
-    const response = await fetch('http://localhost:5500/health');
+    const response = await fetch('http://localhost:5000/health');
     const data = await response.json();
     console.log('Backend conectado:', data);
     return true;
@@ -158,7 +158,7 @@ export default function Registro() {
           navigate('/');
         }, 1500);
       } else {
-        setMessage({ text: data.message || 'Error en el registro', type: 'error' });
+        setMessage({ text: data.message || 'Error en el Registro', type: 'error' });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -183,7 +183,7 @@ export default function Registro() {
         <p className="text-gray-600 text-sm mb-8 text-center">Dale un hogar a tu nuevo mejor amigo</p>
 
         <a 
-          href="http://localhost:3000/auth/google"
+          href="http://localhost:5000/auth/google"
           className="flex items-center justify-center w-full py-3.5 px-5 bg-white border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-blue-500 hover:shadow-lg transition-all mb-5"
         >
           <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

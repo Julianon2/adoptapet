@@ -58,7 +58,7 @@ router.get('/test', (req, res) => {
  */
 router.get('/google/callback',
   passport.authenticate('google', { 
-    failureRedirect: 'http://127.0.0.1:5500/login.html?error=auth_failed', // ✅ PUERTO CORRECTO (Live Server)
+    failureRedirect: 'http://127.0.0.1:5000/login.html?error=auth_failed', // ✅ PUERTO CORRECTO (Live Server)
     session: false
   }),
   authController.googleCallback

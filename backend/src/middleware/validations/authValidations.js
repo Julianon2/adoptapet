@@ -17,7 +17,7 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 /**
- * Validaciones para REGISTRO
+ * Validaciones para Registro
  */
 exports.registerValidation = [
   body('nombre')  // ← CAMBIADO de 'name' a 'nombre'

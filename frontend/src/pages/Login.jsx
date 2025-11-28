@@ -11,7 +11,7 @@ function Login() {
   const [messageType, setMessageType] = useState(''); // 'success' o 'error'
   const [isLoading, setIsLoading] = useState(false);
 
-  const LOGIN_API_URL = 'http://localhost:3000/api';
+  const LOGIN_API_URL = 'http://localhost:5000/api';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -79,14 +79,14 @@ function Login() {
       }
     } catch (error) {
       console.error('❌ Error en login:', error);
-      setMessage('❌ Error al conectar con el servidor. Verifica que el backend esté corriendo en el puerto 3000.');
+      setMessage('❌ Error al conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5000.');
       setMessageType('error');
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:5500/auth/google';
+    window.location.href = 'http://localhost:5000/auth/google';
   };
 
   return (
@@ -177,7 +177,7 @@ function Login() {
           Continuar con Google
         </button>
 
-        {/* Redirección a registro */}
+        {/* Redirección a Registro */}
         <p className="text-center mt-2 text-sm">
           ¿No tienes cuenta?{' '}
           <Link to="/register" className="text-blue-600 font-semibold hover:underline">

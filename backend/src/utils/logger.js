@@ -17,7 +17,7 @@ const colors = {
  */
 exports.showStartupBanner = (config) => {
   const {
-    port = 5500,
+    port = 5000,
     host = '0.0.0.0',
     env = 'development',
     passportLoaded = false,
@@ -109,7 +109,7 @@ exports.log = {
  */
 exports.showConfig = (config) => {
   console.log('\n📋 Configuración cargada:');
-  console.log('   • Puerto:', config.port || 5500);
+  console.log('   • Puerto:', config.port || 5000);
   console.log('   • Ambiente:', config.env || 'development');
   console.log('   • MongoDB:', config.mongoUri ? '✅' : '❌');
   console.log('   • Google OAuth:', config.googleClientId ? '✅' : '❌');

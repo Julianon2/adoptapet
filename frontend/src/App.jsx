@@ -3,8 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Adoptar from './pages/Adoptar';
 import Login from './pages/Login';
-import Perfil from './pages/Perfil';
+import Perfil from './pages/perfil';
 import Notificaciones from './pages/Notificaciones';
+import Registro from './pages/Registro'; // ✅ FIX: Import added
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/notificaciones" element={<Notificaciones/>} />
+        <Route path="/registro" element={<Registro />} />
       </Routes>
     </BrowserRouter>
   );

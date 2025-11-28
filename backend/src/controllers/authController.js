@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
   try {
     const { nombre, email, password, passwordConfirm, telefono } = req.body;
 
-    console.log('📝 Intento de registro:', { nombre, email, telefono });
+    console.log('📝 Intento de Registro:', { nombre, email, telefono });
 
     // Validar que las contraseñas coincidan
     if (password !== passwordConfirm) {
@@ -78,7 +78,7 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en registro:', error);
+    console.error('❌ Error en Registro:', error);
     res.status(500).json({
       success: false,
       message: 'Error al registrar usuario',
@@ -220,7 +220,7 @@ exports.googleCallback = async (req, res) => {
     
     if (!user) {
       console.error('❌ No hay usuario en req.user');
-      return res.redirect('http://127.0.0.1:5500/login.html?error=auth_failed');
+      return res.redirect('http://127.0.0.1:5000/login.html?error=auth_failed');
     }
 
     console.log('✅ Usuario autenticado:', user.email);
@@ -242,7 +242,7 @@ exports.googleCallback = async (req, res) => {
     };
 
     // Redirigir al frontend con token y usuario
-    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
     const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
     
     console.log('🔄 Redirigiendo a frontend');
@@ -250,7 +250,7 @@ exports.googleCallback = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error en googleCallback:', error);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
     res.redirect(`${frontendUrl}/login.html?error=server_error`);
   }
 };

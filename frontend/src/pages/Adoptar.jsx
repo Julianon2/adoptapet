@@ -41,7 +41,7 @@ const DUMMY_PETS = [
     location: "Medellín",
     description: "Max es un perro muy tranquilo y obediente. Es ideal para familias con espacio amplio. Le encanta nadar y jugar con pelotas. Es muy protector pero amigable con todos.",
     images: [
-      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800"
+      "https://images.unsplash.com/photo-1587500003388-59208cc962cb?w=800"
     ],
     vaccinated: true,
     sterilized: false,

@@ -120,7 +120,7 @@ async function testAdoptionModel() {
                         address: 'Calle 100 #15-20'
                     },
                     emergencyBudget: true,
-                    monthlyBudget: 550000
+                    monthlyBudget: 500000
                 },
                 motivation: {
                     whyAdopt: 'Queremos dar un hogar amoroso a un perro que lo necesite. Mis hijos han estado pidiendo una mascota y creemos que es el momento perfecto.',

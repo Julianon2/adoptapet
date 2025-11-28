@@ -82,7 +82,7 @@ async function testPostModel() {
             pet: testPet._id,
             media: {
                 images: [
-                    'https://images.unsplash.com/photo-1587550003388-59208cc962cb?w=600',
+                    'https://images.unsplash.com/photo-1587500003388-59208cc962cb?w=600',
                     'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600'
                 ]
             },

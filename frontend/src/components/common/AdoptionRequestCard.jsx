@@ -1,3 +1,4 @@
+//este codigo es de la pagina perfil
 export default function AdoptionRequestCard({ name, pet, time }) {
   return (
     <div className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:bg-gray-100 transition-all duration-300">

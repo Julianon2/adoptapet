@@ -1,3 +1,4 @@
+//este codigo es de la pagina perfil
 export default function HistoryItem({ icon, title, text, date, color }) {
   return (
     <div className={`bg-${color}-50 border-l-4 border-${color}-500 rounded-lg p-6`}>

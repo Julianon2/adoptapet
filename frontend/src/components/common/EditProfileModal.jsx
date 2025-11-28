@@ -1,3 +1,4 @@
+//este codigo es de la pagina perfil
 import { useState, useEffect } from "react";
 
 export default function EditProfileModal({ isOpen, onClose, user, onSave }) {

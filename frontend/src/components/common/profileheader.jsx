@@ -1,3 +1,4 @@
+//este codigo es de la pagina perfil
 export default function ProfileHeader({ user, onEdit }) {
   return (
     <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">

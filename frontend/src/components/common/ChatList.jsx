@@ -1,3 +1,4 @@
+//este codigo es de la pagina del chat
 export default function ChatList({ chats, selectedChat, onSelectChat }) {
   return (
     <aside className="bg-white rounded-xl shadow-lg overflow-hidden h-full">

@@ -1,3 +1,4 @@
+//este codigo es de la pagina del chat
 import { useState } from 'react';
 import { Send } from 'lucide-react';
 

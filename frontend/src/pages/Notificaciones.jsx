@@ -183,7 +183,7 @@ useEffect(() => {
     setTimeout(() => {
       toast.classList.add('animate-slide-out');
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 5000);
   };
 
   const filteredNotifications = getFilteredNotifications();

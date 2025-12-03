@@ -1,4 +1,5 @@
-import React from "react";
+ //este codigo es de la pagina publicar
+ import React from "react";
 
 const PublishTextarea = ({ value, setValue }) => {
   return (

@@ -1,3 +1,4 @@
+//este codigo es de la pagina publicar
 import React from "react";
 
 const PublishOptions = ({ handleImage }) => {

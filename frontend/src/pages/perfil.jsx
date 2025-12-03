@@ -109,7 +109,7 @@ function Perfil() {
 
   const showNotification = (message) => {
     setNotification(message);
-    setTimeout(() => setNotification(''), 3000);
+    setTimeout(() => setNotification(''), 5000);
   };
 
   if (loading) {

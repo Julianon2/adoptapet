@@ -231,7 +231,7 @@ app.get('/test/config', (req, res) => {
     timestamp: new Date().toISOString(),
     config: {
       nodeEnv: process.env.NODE_ENV || 'development',
-      port: process.env.PORT || 5500,
+      port: process.env.PORT || 5000,
       passport: passportLoaded ? '✅ Cargado' : '❌ NO cargado',
       mongodb: mongoConnected ? '✅ Conectado' : '❌ Desconectado',
       session: '✅ Configurado',
@@ -255,7 +255,7 @@ if (passportLoaded) {
 
   app.get('/auth/google/callback', 
     passport.authenticate('google', { 
-      failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5500'}/login.html?error=auth_failed`,
+      failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5000'}/login.html?error=auth_failed`,
       session: true
     }),
     (req, res) => {
@@ -285,14 +285,14 @@ if (passportLoaded) {
           rol: req.user.role || 'usuario'
         };
         
-        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
         const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
         
         res.redirect(redirectUrl);
         
       } catch (error) {
         console.error('❌ Error en callback de Google:', error);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
         res.redirect(`${frontendUrl}/login.html?error=server_error`);
       }
     }
@@ -476,7 +476,7 @@ app.use((err, req, res, next) => {
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const server = app.listen(PORT, HOST, () => {

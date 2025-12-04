@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http'); // ← NUEVO: Para Socket.io
 const cors = require('cors');
 const session = require('express-session');
 const helmet = require('helmet');
@@ -10,6 +11,7 @@ const path = require('path');
 console.log('🚀 Iniciando Adoptapet Backend v2.0...');
 
 const app = express();
+const server = http.createServer(app); // ← NUEVO: Crear servidor HTTP
 
 // ============================================
 // 1. CORS - DEBE IR PRIMERO ⚠️
@@ -158,7 +160,23 @@ let mongoConnected = false;
 })();
 
 // ============================================
-// 10. LOGGING
+// 10. SOCKET.IO - NUEVO 🔌
+// ============================================
+let io;
+let socketLoaded = false;
+
+try {
+  const { initializeSocket } = require('./src/utils/socket');
+  io = initializeSocket(server);
+  socketLoaded = true;
+  console.log('✅ Socket.io inicializado correctamente');
+} catch (error) {
+  console.error('❌ Error al cargar Socket.io:', error.message);
+  console.log('⚠️  El chat no estará disponible');
+}
+
+// ============================================
+// 11. LOGGING
 // ============================================
 const logger = require('./src/utils/logger');
 
@@ -186,7 +204,8 @@ app.get('/health', (req, res) => {
     services: {
       api: 'operational',
       mongodb: mongoConnected ? 'connected' : 'disconnected',
-      googleAuth: passportLoaded ? 'enabled' : 'disabled'
+      googleAuth: passportLoaded ? 'enabled' : 'disabled',
+      socketio: socketLoaded ? 'active' : 'inactive' // ← NUEVO
     },
     memory: {
       used: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
@@ -208,7 +227,8 @@ app.get('/api/info', (req, res) => {
       auth: '/api/auth',
       pets: '/api/pets',
       users: '/api/users',
-      applications: '/api/applications'
+      applications: '/api/applications',
+      chat: '/api/chat' // ← NUEVO
     }
   });
 });
@@ -222,6 +242,7 @@ app.get('/test/config', (req, res) => {
       port: process.env.PORT || 5000,
       passport: passportLoaded ? '✅ Cargado' : '❌ NO cargado',
       mongodb: mongoConnected ? '✅ Conectado' : '❌ Desconectado',
+      socketio: socketLoaded ? '✅ Activo' : '❌ Inactivo', // ← NUEVO
       session: '✅ Configurado',
       googleClientId: process.env.GOOGLE_CLIENT_ID ? '✅ Configurado' : '❌ NO configurado',
       googleSecret: process.env.GOOGLE_CLIENT_SECRET ? '✅ Configurado' : '❌ NO configurado',
@@ -243,7 +264,7 @@ if (passportLoaded) {
 
   app.get('/auth/google/callback', 
     passport.authenticate('google', { 
-      failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5000'}/login?error=auth_failed`,
+      failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=auth_failed`,
       session: true
     }),
     (req, res) => {
@@ -259,7 +280,7 @@ if (passportLoaded) {
           { 
             id: req.user._id || req.user.id, 
             email: req.user.email,
-            role: req.user.role || 'usuario'
+            role: req.user.role || 'adopter'
           },
           process.env.JWT_SECRET || 'adoptapet_secreto_super_seguro_2025',
           { expiresIn: '7d' }
@@ -267,14 +288,13 @@ if (passportLoaded) {
         
         const userData = {
           id: req.user._id || req.user.id,
-          nombre: req.user.name,
+          nombre: req.user.nombre,
           email: req.user.email,
           avatar: req.user.avatar,
-          rol: req.user.role || 'usuario'
+          rol: req.user.role || 'adopter'
         };
         
-        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
-        // ✅ SIN .html - React Router maneja esto
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
         const redirectUrl = `${frontendUrl}/Home?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
         
         console.log('🔄 Redirigiendo a:', redirectUrl);
@@ -282,7 +302,7 @@ if (passportLoaded) {
         
       } catch (error) {
         console.error('❌ Error en callback de Google:', error);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
         res.redirect(`${frontendUrl}/login?error=server_error`);
       }
     }
@@ -294,10 +314,10 @@ if (passportLoaded) {
         success: true,
         user: {
           id: req.user._id || req.user.id,
-          nombre: req.user.name,
+          nombre: req.user.nombre,
           email: req.user.email,
           avatar: req.user.avatar,
-          rol: req.user.role || 'usuario'
+          rol: req.user.role || 'adopter'
         }
       });
     } else {
@@ -390,15 +410,16 @@ try {
 }
 
 // ============================================
-// MANEJO DE ERRORES 404 (para rutas API)
+// RUTAS DE CHAT - NUEVO 💬
 // ============================================
-app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    message: `Endpoint no encontrado: ${req.method} ${req.path}`,
-    suggestion: 'Verifica la documentación en /api/info'
-  });
-});
+try {
+  const chatRoutes = require('./src/routes/chatRoutes');
+  app.use('/api/chat', chatRoutes);
+  logger.log.success('Rutas de chat cargadas');
+} catch (error) {
+  logger.log.warning('Rutas de chat no disponibles');
+  console.error('Error detallado:', error.message);
+}
 
 // ============================================
 // MANEJO DE ERRORES 404 (para rutas API)
@@ -479,18 +500,19 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
-// INICIAR SERVIDOR
+// INICIAR SERVIDOR - MODIFICADO PARA USAR server
 // ============================================
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-const server = app.listen(PORT, HOST, () => {
+server.listen(PORT, HOST, () => { // ← CAMBIO: server en lugar de app
   logger.showStartupBanner({
     port: PORT,
     host: HOST,
     env: process.env.NODE_ENV || 'development',
     passportLoaded,
-    mongoConnected
+    mongoConnected,
+    socketLoaded // ← NUEVO
   });
 });
 
@@ -500,8 +522,15 @@ const server = app.listen(PORT, HOST, () => {
 const gracefulShutdown = (signal) => {
   logger.showShutdown(signal);
   
-  server.close(async () => {
+  server.close(async () => { // ← CAMBIO: server en lugar de app
     logger.log.success('Servidor HTTP cerrado');
+    
+    // Cerrar Socket.io
+    if (socketLoaded && io) {
+      io.close(() => {
+        logger.log.success('Socket.io cerrado');
+      });
+    }
     
     if (mongoConnected) {
       try {

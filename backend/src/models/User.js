@@ -2,23 +2,6 @@
 // MODELO USER - ADOPTAPET RED SOCIAL
 // =============================================
 
-/**
- * INFORMACIÓN DEL ARCHIVO:
- * 
- * ¿Qué hace este archivo?
- * Define el modelo de datos para los usuarios de la plataforma
- * 
- * ¿Qué incluye?
- * - Esquema completo de usuario con validaciones
- * - Encriptación de contraseñas con bcrypt
- * - Sistema de roles (adopter, shelter, admin)
- * - Métodos de autenticación
- * - Middleware para seguridad
- * - Soporte para Google OAuth
- * 
- * Proyecto: AdoptaPet - Red Social de Adopción
- */
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -40,12 +23,11 @@ const userSchema = new mongoose.Schema({
         trim: true,
         minlength: [2, 'El nombre debe tener al menos 2 caracteres'],
         maxlength: [50, 'El nombre debe tener máximo 50 caracteres'],
-        validate:{
-            validator: function(name){
-                // Permitir letras (incluyendo ñ y acentos) y espacios
-            return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
+        validate: {
+            validator: function(name) {
+                return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
             },
-            message:'El nombre solo puede contener letras y espacios'
+            message: 'El nombre solo puede contener letras y espacios'
         }
     },
     
@@ -64,11 +46,9 @@ const userSchema = new mongoose.Schema({
         index: true
     },
     
-    // Password ahora es opcional si el usuario se registra con Google
     password: {
         type: String,
         required: function() {
-            // Solo requerido si NO se registró con Google
             return !this.googleId;
         },
         minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
@@ -82,7 +62,7 @@ const userSchema = new mongoose.Schema({
     googleId: {
         type: String,
         unique: true,
-        sparse: true, // Permite que sea null y aún así único
+        sparse: true,
         select: false
     },
     
@@ -103,7 +83,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: {
-            values: ['admin', 'adoptante', 'refugio', 'usuario', 'adopter'], // ✅ AGREGADO 'adopter'
+            values: ['admin', 'adoptante', 'refugio', 'usuario', 'adopter', 'shelter'],
             message: '{VALUE} no es un rol válido'
         },
         default: 'adopter',
@@ -125,16 +105,13 @@ const userSchema = new mongoose.Schema({
         maxlength: [500, 'La biografía no puede tener más de 500 caracteres']
     },
     
-    // ✅ TELÉFONO AHORA ES OPCIONAL
     phone: {
         type: String,
-        required: false, // ✅ CAMBIADO A FALSE
+        required: false,
         trim: true,
         validate: {
             validator: function(v) {
-                // Si no hay teléfono, es válido (opcional)
                 if (!v || v.length === 0) return true;
-                // Si hay teléfono, debe tener 10 dígitos
                 return /^[0-9]{10}$/.test(v);
             },
             message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
@@ -224,7 +201,7 @@ const userSchema = new mongoose.Schema({
     },
     
     // =============================================
-    // PREFERENCIAS DE ADOPCIÓN (para adopters)
+    // PREFERENCIAS DE ADOPCIÓN
     // =============================================
     
     adoptionPreferences: {
@@ -241,15 +218,9 @@ const userSchema = new mongoose.Schema({
             enum: ['cachorro', 'joven', 'adulto', 'senior', 'cualquiera'],
             default: 'cualquiera'
         },
-        hasGarden: {
-            type: Boolean
-        },
-        hasOtherPets: {
-            type: Boolean
-        },
-        hasChildren: {
-            type: Boolean
-        },
+        hasGarden: Boolean,
+        hasOtherPets: Boolean,
+        hasChildren: Boolean,
         experience: {
             type: String,
             enum: ['ninguna', 'poca', 'moderada', 'mucha'],
@@ -262,32 +233,26 @@ const userSchema = new mongoose.Schema({
     // =============================================
     
     stats: {
-        petsPublished: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
-        petsAdopted: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
-        postsCount: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
-        followersCount: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
-        followingCount: {
-            type: Number,
-            default: 0,
-            min: 0
-        }
+        petsPublished: { type: Number, default: 0, min: 0 },
+        petsAdopted: { type: Number, default: 0, min: 0 },
+        postsCount: { type: Number, default: 0, min: 0 },
+        followersCount: { type: Number, default: 0, min: 0 },
+        followingCount: { type: Number, default: 0, min: 0 }
     },
+    
+    // =============================================
+    // CONEXIONES SOCIALES
+    // =============================================
+    
+    connections: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    
+    favoritesPets: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Pet'
+    }],
     
     // =============================================
     // SEGURIDAD
@@ -303,18 +268,14 @@ const userSchema = new mongoose.Schema({
         select: false
     },
     
-    lastLogin: {
-        type: Date
-    },
+    lastLogin: Date,
     
     loginAttempts: {
         type: Number,
         default: 0
     },
     
-    lockUntil: {
-        type: Date
-    },
+    lockUntil: Date,
     
     // =============================================
     // ESTADO DE LA CUENTA
@@ -336,32 +297,14 @@ const userSchema = new mongoose.Schema({
     
     settings: {
         notifications: {
-            email: {
-                type: Boolean,
-                default: true
-            },
-            push: {
-                type: Boolean,
-                default: true
-            },
-            adoptionUpdates: {
-                type: Boolean,
-                default: true
-            },
-            newFollowers: {
-                type: Boolean,
-                default: true
-            }
+            email: { type: Boolean, default: true },
+            push: { type: Boolean, default: true },
+            adoptionUpdates: { type: Boolean, default: true },
+            newFollowers: { type: Boolean, default: true }
         },
         privacy: {
-            showEmail: {
-                type: Boolean,
-                default: false
-            },
-            showPhone: {
-                type: Boolean,
-                default: false
-            },
+            showEmail: { type: Boolean, default: false },
+            showPhone: { type: Boolean, default: false },
             profileVisibility: {
                 type: String,
                 enum: ['public', 'followers', 'private'],
@@ -369,15 +312,6 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    
-    // =============================================
-    // RELACIONES CON OTROS MODELOS
-    // =============================================
-    
-    favoritesPets: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pet'
-    }],
     
     // =============================================
     // TOKENS Y SESIONES
@@ -392,12 +326,7 @@ const userSchema = new mongoose.Schema({
     }]
     
 }, {
-    // =============================================
-    // OPCIONES DEL SCHEMA
-    // =============================================
-    
     timestamps: true,
-    
     toJSON: { 
         virtuals: true,
         transform: function(doc, ret) {
@@ -414,25 +343,24 @@ const userSchema = new mongoose.Schema({
             return ret;
         }
     },
-    
     toObject: { 
         virtuals: true
     }
 });
 
 // =============================================
-// CAMPOS VIRTUALES - PROPIEDADES CALCULADAS
+// CAMPOS VIRTUALES
 // =============================================
 
 userSchema.virtual('displayName').get(function() {
-    if (this.role === 'shelter' && this.shelterInfo?.organizationName) {
+    if ((this.role === 'shelter' || this.role === 'refugio') && this.shelterInfo?.organizationName) {
         return this.shelterInfo.organizationName;
     }
     return this.name;
 });
 
 userSchema.virtual('isFullyVerified').get(function() {
-    if (this.role === 'shelter') {
+    if (this.role === 'shelter' || this.role === 'refugio') {
         return this.verified.email && this.verified.shelter;
     }
     return this.verified.email;
@@ -455,13 +383,12 @@ userSchema.virtual('roleText').get(function() {
 });
 
 userSchema.virtual('profileCompleteness').get(function() {
-    let completeness = 0;
     const fields = [
         this.name,
         this.email,
         this.avatar,
         this.bio,
-        this.phone, // Ahora es opcional pero cuenta para completitud
+        this.phone,
         this.location?.city,
         this.verified.email
     ];
@@ -475,26 +402,20 @@ userSchema.virtual('profileCompleteness').get(function() {
     }
     
     const filledFields = fields.filter(field => field).length;
-    completeness = Math.round((filledFields / fields.length) * 100);
-    
-    return completeness;
+    return Math.round((filledFields / fields.length) * 100);
 });
 
 // =============================================
-// MIDDLEWARE - FUNCIONES AUTOMÁTICAS
+// MIDDLEWARE
 // =============================================
 
-// MIDDLEWARE PRE-SAVE: Encriptar contraseña
 userSchema.pre('save', async function(next) {
-    // Solo encriptar si hay contraseña y fue modificada
     if (!this.password || !this.isModified('password')) return next();
     
     try {
         console.log(`🔐 Encriptando contraseña para usuario: ${this.email}`);
-        
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
-        
         console.log(`✅ Contraseña encriptada exitosamente`);
         next();
     } catch (error) {
@@ -503,18 +424,14 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// MIDDLEWARE PRE-SAVE: Validaciones adicionales
 userSchema.pre('save', function(next) {
     console.log(`👤 Procesando usuario antes de guardar: ${this.email}`);
     
-    // Si es refugio, validar que tenga información de organización
     if ((this.role === 'shelter' || this.role === 'refugio') && !this.shelterInfo?.organizationName) {
         console.log('⚠️ Refugio sin nombre de organización');
     }
     
-    // Generar avatar por defecto si no tiene
     if (!this.avatar || this.avatar === 'https://ui-avatars.com/api/?name=User&background=random') {
-        // Si tiene avatar de Google, usar ese
         if (this.googleAvatar) {
             this.avatar = this.googleAvatar;
             console.log(`🎨 Avatar de Google configurado`);
@@ -527,7 +444,6 @@ userSchema.pre('save', function(next) {
     next();
 });
 
-// MIDDLEWARE POST-SAVE
 userSchema.post('save', function(doc) {
     console.log(`✅ Usuario guardado exitosamente:`);
     console.log(`   👤 Nombre: ${doc.name}`);
@@ -543,10 +459,8 @@ userSchema.post('save', function(doc) {
 // MÉTODOS DE INSTANCIA
 // =============================================
 
-// Método: Comparar contraseña
 userSchema.methods.comparePassword = async function(candidatePassword) {
     try {
-        // Si el usuario se registró con Google, no tiene contraseña local
         if (this.authProvider === 'google' && !this.password) {
             return false;
         }
@@ -556,7 +470,6 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     }
 };
 
-// Método: Incrementar intentos de login
 userSchema.methods.incrementLoginAttempts = function() {
     if (this.lockUntil && this.lockUntil < Date.now()) {
         return this.updateOne({
@@ -575,7 +488,6 @@ userSchema.methods.incrementLoginAttempts = function() {
     return this.updateOne(updates);
 };
 
-// Método: Resetear intentos de login
 userSchema.methods.resetLoginAttempts = function() {
     return this.updateOne({
         $set: { loginAttempts: 0, lastLogin: Date.now() },
@@ -583,7 +495,6 @@ userSchema.methods.resetLoginAttempts = function() {
     });
 };
 
-// Método: Verificar email
 userSchema.methods.verifyEmail = function() {
     this.verified.email = true;
     this.verificationToken = undefined;
@@ -591,7 +502,6 @@ userSchema.methods.verifyEmail = function() {
     return this.save();
 };
 
-// Método: Agregar mascota a favoritos
 userSchema.methods.addFavoritePet = function(petId) {
     if (!this.favoritesPets.includes(petId)) {
         this.favoritesPets.push(petId);
@@ -600,7 +510,6 @@ userSchema.methods.addFavoritePet = function(petId) {
     return Promise.resolve(this);
 };
 
-// Método: Remover mascota de favoritos
 userSchema.methods.removeFavoritePet = function(petId) {
     this.favoritesPets = this.favoritesPets.filter(
         id => id.toString() !== petId.toString()
@@ -608,17 +517,14 @@ userSchema.methods.removeFavoritePet = function(petId) {
     return this.save();
 };
 
-// Método: Verificar si es administrador
 userSchema.methods.isAdmin = function() {
     return this.role === 'admin';
 };
 
-// Método: Verificar si es refugio
 userSchema.methods.isShelter = function() {
     return this.role === 'shelter' || this.role === 'refugio';
 };
 
-// Método: Verificar si puede publicar mascotas
 userSchema.methods.canPublishPets = function() {
     return this.role === 'shelter' || this.role === 'refugio' || this.role === 'admin';
 };
@@ -627,12 +533,10 @@ userSchema.methods.canPublishPets = function() {
 // MÉTODOS ESTÁTICOS
 // =============================================
 
-// Método estático: Buscar por email
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email.toLowerCase() });
 };
 
-// Método estático: Buscar refugios verificados
 userSchema.statics.findVerifiedShelters = function(city = null) {
     const query = {
         $or: [{ role: 'shelter' }, { role: 'refugio' }],
@@ -647,9 +551,8 @@ userSchema.statics.findVerifiedShelters = function(city = null) {
     return this.find(query).select('-password');
 };
 
-// Método estático: Estadísticas de usuarios
 userSchema.statics.getUserStats = async function() {
-    const stats = await this.aggregate([
+    return await this.aggregate([
         {
             $group: {
                 _id: '$role',
@@ -657,12 +560,10 @@ userSchema.statics.getUserStats = async function() {
             }
         }
     ]);
-    
-    return stats;
 };
 
 // =============================================
-// ÍNDICES COMPUESTOS
+// ÍNDICES
 // =============================================
 
 userSchema.index({ email: 1, status: 1 });
@@ -671,7 +572,7 @@ userSchema.index({ 'location.city': 1, role: 1 });
 userSchema.index({ googleId: 1 }, { sparse: true });
 
 // =============================================
-// CREAR EL MODELO DESDE EL ESQUEMA
+// CREAR Y EXPORTAR MODELO
 // =============================================
 
 const User = mongoose.model('User', userSchema);
@@ -679,10 +580,6 @@ const User = mongoose.model('User', userSchema);
 console.log('✅ Modelo User creado exitosamente');
 console.log('📋 Collection en MongoDB: users');
 console.log('🔐 Soporte Google OAuth: Habilitado');
-
-// =============================================
-// EXPORTAR EL MODELO
-// =============================================
 
 module.exports = User;
 

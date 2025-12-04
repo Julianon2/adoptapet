@@ -4,8 +4,8 @@ const cors = require('cors');
 const session = require('express-session');
 const helmet = require('helmet');
 const compression = require('compression');
-
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 console.log('🚀 Iniciando Adoptapet Backend v2.0...');
 
@@ -15,7 +15,7 @@ const app = express();
 // 1. CORS - DEBE IR PRIMERO ⚠️
 // ============================================
 app.use(cors({
-  origin: true, // Acepta cualquier origen
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -35,35 +35,28 @@ app.use(helmet({
 app.use(compression());
 
 // ============================================
-// 4. BODY PARSERS (antes de mongoSanitize)
+// 4. BODY PARSERS
 // ============================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============================================
-// 5. PROTECCIÓN NoSQL (después de parsers)
-// ============================================
-// ============================================
-// 5. PROTECCIÓN NoSQL INJECTION (Manual)
+// 5. PROTECCIÓN NoSQL INJECTION
 // ============================================
 app.use((req, res, next) => {
-  // Función para sanitizar objetos recursivamente
   const sanitize = (obj) => {
     if (!obj || typeof obj !== 'object') return obj;
     
     for (let key in obj) {
-      // Eliminar claves que empiezan con $ o contienen puntos
       if (key.startsWith('$') || key.includes('.')) {
         delete obj[key];
       } else if (typeof obj[key] === 'object') {
-        // Recursivo para objetos anidados
         sanitize(obj[key]);
       }
     }
     return obj;
   };
   
-  // Sanitizar body, query y params
   if (req.body) req.body = sanitize(req.body);
   if (req.query) req.query = sanitize(req.query);
   if (req.params) req.params = sanitize(req.params);
@@ -72,17 +65,13 @@ app.use((req, res, next) => {
 });
 
 console.log('✅ Protección NoSQL Injection activada');
+
 // ============================================
 // 6. RATE LIMITING
 // ============================================
-// ============================================
-// 6. RATE LIMITING - CONFIGURACIÓN CORREGIDA
-// ============================================
-
-// Limiter general para todas las rutas API
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 1000, // 1000 peticiones (MUY permisivo para desarrollo)
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   message: { 
     success: false, 
     message: 'Demasiadas peticiones, intenta más tarde' 
@@ -92,15 +81,14 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Limiter para autenticación (MÁS PERMISIVO)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos (antes era 1 hora)
-  max: 100, // 100 intentos (antes eran solo 5) ✅
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: { 
     success: false, 
     message: 'Demasiados intentos de login, intenta en 15 minutos' 
   },
-  skipSuccessfulRequests: true, // No contar logins exitosos ✅
+  skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -255,7 +243,7 @@ if (passportLoaded) {
 
   app.get('/auth/google/callback', 
     passport.authenticate('google', { 
-      failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5000'}/login.html?error=auth_failed`,
+      failureRedirect: `${process.env.FRONTEND_URL || 'http://127.0.0.1:5000'}/login?error=auth_failed`,
       session: true
     }),
     (req, res) => {
@@ -286,14 +274,16 @@ if (passportLoaded) {
         };
         
         const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
-        const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+        // ✅ SIN .html - React Router maneja esto
+        const redirectUrl = `${frontendUrl}/Home?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
         
+        console.log('🔄 Redirigiendo a:', redirectUrl);
         res.redirect(redirectUrl);
         
       } catch (error) {
         console.error('❌ Error en callback de Google:', error);
         const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
-        res.redirect(`${frontendUrl}/login.html?error=server_error`);
+        res.redirect(`${frontendUrl}/login?error=server_error`);
       }
     }
   );
@@ -400,14 +390,29 @@ try {
 }
 
 // ============================================
-// MANEJO DE ERRORES 404
+// MANEJO DE ERRORES 404 (para rutas API)
 // ============================================
-app.use((req, res) => {
+app.use((req, res, next) => {
   res.status(404).json({
     success: false,
     message: `Endpoint no encontrado: ${req.method} ${req.path}`,
     suggestion: 'Verifica la documentación en /api/info'
   });
+});
+
+// ============================================
+// MANEJO DE ERRORES 404 (para rutas API)
+// ============================================
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
+    res.status(404).json({
+      success: false,
+      message: `Endpoint no encontrado: ${req.method} ${req.path}`,
+      suggestion: 'Verifica la documentación en /api/info'
+    });
+  } else {
+    next();
+  }
 });
 
 // ============================================

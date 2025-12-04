@@ -205,10 +205,13 @@ function Perfil() {
                 <div className="text-3xl font-bold text-purple-600">12</div>
                 <div className="text-sm text-gray-600">Información</div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100">
-                <div className="text-3xl font-bold text-cyan-600">8</div>
-                <div className="text-sm text-gray-600">Favoritos</div>
+                            <div 
+                onClick={() => window.location.href = '../pages/favoritos.jsx'}
+                className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <div className="text-4xl font-bold text-cyan-600 mb-2">8</div>
+                <div className="text-sm font-semibold text-gray-700">Favoritos</div>
               </div>
+
               <div className="bg-gray-50 rounded-xl p-4">
                 <div className="text-3xl font-bold text-pink-600">25</div>
                 <div className="text-sm text-gray-600">Publicaciones</div>

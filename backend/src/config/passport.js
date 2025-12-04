@@ -8,7 +8,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/auth/google/callback',
-      proxy: true // Importante para producción con HTTPS
+      proxy: true
     },
     
     async (accessToken, refreshToken, profile, done) => {
@@ -17,7 +17,6 @@ passport.use(
         console.log('   Usuario:', profile.displayName);
         console.log('   Email:', profile.emails?.[0]?.value);
         
-        // Verificar que tengamos email
         if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
           console.error('❌ No se recibió email de Google');
           return done(new Error('No se pudo obtener el email de Google'), null);
@@ -44,25 +43,30 @@ passport.use(
                              Math.random().toString(36).slice(-12) + 
                              'Aa1!@#';
 
-        // Crear usuario - AJUSTA LOS CAMPOS SEGÚN TU MODELO
+        // ✅ CREAR USUARIO - phone es opcional ahora
         user = await User.create({
-          name: nombre,           // Si tu modelo usa 'name'
-          // nombre: nombre,      // Si tu modelo usa 'nombre' (descomenta esta línea)
+          name: nombre,
           email: email.toLowerCase(),
           password: randomPassword,
           avatar: picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=random`,
-          role: 'adopter',        // Si tu modelo usa 'role'
-          // rol: 'adopter',      // Si tu modelo usa 'rol' (descomenta esta línea)
+          googleAvatar: picture, // Guardar avatar de Google
+          role: 'adopter', // ✅ Ahora debe funcionar
+          authProvider: 'google',
+          googleId: profile.id,
+          // ⚠️ NO incluir phone - es opcional
           verified: {
-            email: true
-          },
-          googleId: profile.id    // Guardar el ID de Google (útil para futuras autenticaciones)
+            email: true, // Google ya verificó el email
+            phone: false,
+            shelter: false
+          }
         });
 
         console.log('✅ Usuario creado exitosamente');
         console.log('   ID:', user._id);
         console.log('   Email:', user.email);
         console.log('   Nombre:', user.name);
+        console.log('   Rol:', user.role);
+        console.log('   ⚠️ Teléfono: No proporcionado (opcional)');
         
         return done(null, user);
 
@@ -70,7 +74,6 @@ passport.use(
         console.error('❌ Error en Google Strategy:', error.message);
         console.error('   Stack:', error.stack);
         
-        // Si es un error de validación de Mongoose, dar más detalles
         if (error.name === 'ValidationError') {
           console.error('   Errores de validación:');
           Object.keys(error.errors).forEach(key => {
@@ -84,7 +87,7 @@ passport.use(
   )
 );
 
-// Serialización (para sesiones)
+// Serialización
 passport.serializeUser((user, done) => {
   console.log('📦 Serializando usuario con ID:', user._id);
   done(null, user._id);

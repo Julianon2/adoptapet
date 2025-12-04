@@ -29,14 +29,6 @@ console.log('👤 Iniciando creación del modelo User...');
 // =============================================
 
 const userSchema = new mongoose.Schema({
-    password: {
-        type: String,
-        required: function() {
-            return !this.googleId;
-        },
-        minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
-        select: false
-    },
     
     // =============================================
     // INFORMACIÓN BÁSICA Y AUTENTICACIÓN
@@ -111,7 +103,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: {
-            values: ['admin', 'adoptante', 'refugio', 'usuario'],
+            values: ['admin', 'adoptante', 'refugio', 'usuario', 'adopter'], // ✅ AGREGADO 'adopter'
             message: '{VALUE} no es un rol válido'
         },
         default: 'adopter',
@@ -133,13 +125,17 @@ const userSchema = new mongoose.Schema({
         maxlength: [500, 'La biografía no puede tener más de 500 caracteres']
     },
     
+    // ✅ TELÉFONO AHORA ES OPCIONAL
     phone: {
         type: String,
-        required: [true, 'El número de teléfono es obligatorio'],
+        required: false, // ✅ CAMBIADO A FALSE
         trim: true,
         validate: {
             validator: function(v) {
-               return /^[0-9]{10}$/.test(v);
+                // Si no hay teléfono, es válido (opcional)
+                if (!v || v.length === 0) return true;
+                // Si hay teléfono, debe tener 10 dígitos
+                return /^[0-9]{10}$/.test(v);
             },
             message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
         }
@@ -449,8 +445,11 @@ userSchema.virtual('isLocked').get(function() {
 userSchema.virtual('roleText').get(function() {
     const roleTexts = {
         'adopter': 'Adoptante',
+        'adoptante': 'Adoptante',
         'shelter': 'Refugio',
-        'admin': 'Administrador'
+        'refugio': 'Refugio',
+        'admin': 'Administrador',
+        'usuario': 'Usuario'
     };
     return roleTexts[this.role] || this.role;
 });
@@ -462,12 +461,12 @@ userSchema.virtual('profileCompleteness').get(function() {
         this.email,
         this.avatar,
         this.bio,
-        this.phone,
+        this.phone, // Ahora es opcional pero cuenta para completitud
         this.location?.city,
         this.verified.email
     ];
     
-    if (this.role === 'shelter') {
+    if (this.role === 'shelter' || this.role === 'refugio') {
         fields.push(
             this.shelterInfo?.organizationName,
             this.shelterInfo?.description,
@@ -509,7 +508,7 @@ userSchema.pre('save', function(next) {
     console.log(`👤 Procesando usuario antes de guardar: ${this.email}`);
     
     // Si es refugio, validar que tenga información de organización
-    if (this.role === 'shelter' && !this.shelterInfo?.organizationName) {
+    if ((this.role === 'shelter' || this.role === 'refugio') && !this.shelterInfo?.organizationName) {
         console.log('⚠️ Refugio sin nombre de organización');
     }
     
@@ -536,6 +535,7 @@ userSchema.post('save', function(doc) {
     console.log(`   🎭 Rol: ${doc.roleText}`);
     console.log(`   🔐 Proveedor: ${doc.authProvider}`);
     console.log(`   ✅ Verificado: ${doc.verified.email ? 'Sí' : 'No'}`);
+    console.log(`   📱 Teléfono: ${doc.phone || 'No proporcionado'}`);
     console.log(`   🆔 ID: ${doc._id}`);
 });
 
@@ -615,12 +615,12 @@ userSchema.methods.isAdmin = function() {
 
 // Método: Verificar si es refugio
 userSchema.methods.isShelter = function() {
-    return this.role === 'shelter';
+    return this.role === 'shelter' || this.role === 'refugio';
 };
 
 // Método: Verificar si puede publicar mascotas
 userSchema.methods.canPublishPets = function() {
-    return this.role === 'shelter' || this.role === 'admin';
+    return this.role === 'shelter' || this.role === 'refugio' || this.role === 'admin';
 };
 
 // =============================================
@@ -635,7 +635,7 @@ userSchema.statics.findByEmail = function(email) {
 // Método estático: Buscar refugios verificados
 userSchema.statics.findVerifiedShelters = function(city = null) {
     const query = {
-        role: 'shelter',
+        $or: [{ role: 'shelter' }, { role: 'refugio' }],
         'verified.shelter': true,
         status: 'active'
     };

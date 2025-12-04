@@ -243,7 +243,7 @@ exports.googleCallback = async (req, res) => {
 
     // Redirigir al frontend con token y usuario
     const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5000';
-    const redirectUrl = `${frontendUrl}/index.html?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+    const redirectUrl = `${frontendUrl}/Home?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
     
     console.log('🔄 Redirigiendo a frontend');
     res.redirect(redirectUrl);

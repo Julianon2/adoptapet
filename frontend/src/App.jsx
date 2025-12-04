@@ -17,6 +17,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/" element={<Home />} />
+        {/* ✅ Ruta para callback de Google OAuth */}
+        <Route path="/Home" element={<Home />} />
         <Route path="/adoptar" element={<Adoptar />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/notificaciones" element={<Notificaciones />} />

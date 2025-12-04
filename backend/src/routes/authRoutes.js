@@ -4,7 +4,6 @@
 
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
@@ -12,8 +11,6 @@ const { protect } = require('../middleware/auth');
 const {
   registerValidation,
   loginValidation,
-  updateProfileValidation,
-  changePasswordValidation
 } = require('../middleware/validations/authValidations');
 
 // =============================================
@@ -48,34 +45,9 @@ router.get('/test', (req, res) => {
 });
 
 // =============================================
-// RUTAS DE GOOGLE OAUTH
+// NOTA: Las rutas de Google OAuth están en server.js
+// para evitar duplicación y conflictos
 // =============================================
-
-/**
- * @route   GET /auth/google
- * @desc    Iniciar autenticación con Google
- * @access  Public
- */
-router.get('/google/callback',
-  passport.authenticate('google', { 
-    failureRedirect: 'http://127.0.0.1:5000/login.html?error=auth_failed', // ✅ PUERTO CORRECTO (Live Server)
-    session: false
-  }),
-  authController.googleCallback
-);
-
-/**
- * @route   GET /auth/google/callback
- * @desc    Callback de Google OAuth
- * @access  Public
- */
-router.get('/google/callback',
-  passport.authenticate('google', { 
-    failureRedirect: 'http://127.0.0.1:5000/login.html?error=auth_failed',
-    session: false
-  }),
-  authController.googleCallback
-);
 
 // =============================================
 // RUTAS PROTEGIDAS

@@ -9,6 +9,7 @@ import Registro from './pages/registro';
 import Publicar from './pages/publicar';
 import Chat from './pages/Chat';
 import Ajustes from './pages/Ajustes';
+import Amigos from './pages/amigos';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/publicar" element={<Publicar />} />
         <Route path="/mensajes" element={<Chat />} /> 
         <Route path="/ajustes" element={<Ajustes />} />
+        <Route path="/amigos" element={<Amigos />} />
       </Routes>
     </BrowserRouter>
   );

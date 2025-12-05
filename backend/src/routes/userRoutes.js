@@ -1,16 +1,40 @@
-// routes/user.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const { protect } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+
+// Middleware de autenticación
+const auth = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No autorizado'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'adoptapet_secreto_super_seguro_2025');
+    req.userId = decoded.id;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Token inválido'
+    });
+  }
+};
+
+// Importar modelo User
 const User = require('../models/User');
 
-// ===========================
-// 1. Obtener perfil del usuario autenticado
-// ===========================
-router.get('/profile', protect, async (req, res) => {
+// OBTENER PERFIL DEL USUARIO ACTUAL
+router.get('/profile', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    console.log('👤 Obteniendo perfil de usuario:', req.userId);
+
+    const user = await User.findById(req.userId).select('-password -googleId');
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -20,76 +44,30 @@ router.get('/profile', protect, async (req, res) => {
 
     res.json({
       success: true,
-      user
+      data: {
+        id: user._id,
+        nombre: user.nombre,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+        createdAt: user.createdAt
+      }
     });
+
   } catch (error) {
-    console.error('Error al obtener perfil:', error);
+    console.error('❌ Error obteniendo perfil:', error);
     res.status(500).json({
       success: false,
-      message: 'Error del servidor al obtener el perfil'
+      message: 'Error al obtener el perfil'
     });
   }
 });
 
-// ===========================
-// 2. Actualizar perfil (nombre, email, foto, etc.)
-// ===========================
-router.put('/profile', protect, async (req, res) => {
-  const { name, email, avatar } = req.body;
-
-  // Campos permitidos para actualizar
-  const updates = {};
-  if (name) updates.name = name;
-  if (email) updates.email = email;
-  if (avatar) updates.avatar = avatar;
-
+// OBTENER PERFIL DE OTRO USUARIO POR ID
+router.get('/profile/:userId', auth, async (req, res) => {
   try {
-  // Si se intenta cambiar el email, verificar que no esté en uso
-  if (email) {
-    const existingUser = await User.findOne({ email, _id: { $ne: req.userId } });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Este email ya está registrado por otro usuario'
-      });
-    }
-  }
+    const user = await User.findById(req.params.userId).select('-password -googleId');
 
-  const user = await User.findByIdAndUpdate(
-    req.userId,
-    { $set: updates },
-    { new: true, runValidators: true }
-  ).select('-password');
-
-  res.json({
-    success: true,
-    message: 'Perfil actualizado correctamente',
-    user
-  });
-} catch (error) {
-  console.error('Error al actualizar perfil:', error);
-  res.status(500).json({
-    success: false,
-    message: 'Error al actualizar el perfil'
-  });
-}
-});
-
-// ===========================
-// 3. Cambiar contraseña
-// ===========================
-router.put('/change-password', verifyToken, async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({
-      success: false,
-      message: 'Debes enviar la contraseña actual y la nueva'
-    });
-  }
-
-  try {
-    const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -97,58 +75,65 @@ router.put('/change-password', verifyToken, async (req, res) => {
       });
     }
 
-    // Verificar contraseña actual
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
+    res.json({
+      success: true,
+      data: {
+        id: user._id,
+        nombre: user.nombre,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener el perfil'
+    });
+  }
+});
+
+// ACTUALIZAR PERFIL
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { nombre, avatar } = req.body;
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: 'La contraseña actual es incorrecta'
+        message: 'Usuario no encontrado'
       });
     }
 
-    // Hashear nueva contraseña
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    if (nombre) user.nombre = nombre;
+    if (avatar) user.avatar = avatar;
 
     await user.save();
 
     res.json({
       success: true,
-      message: 'Contraseña actualizada correctamente'
+      message: 'Perfil actualizado exitosamente',
+      data: {
+        id: user._id,
+        nombre: user.nombre,
+        email: user.email,
+        avatar: user.avatar
+      }
     });
+
   } catch (error) {
-    console.error('Error al cambiar contraseña:', error);
+    console.error('❌ Error actualizando perfil:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al cambiar la contraseña'
+      message: 'Error al actualizar el perfil'
     });
   }
 });
 
-// ===========================
-// 4. (Opcional) Eliminar cuenta
-// ===========================
-router.delete('/delete', protect, async (req, res) => { 
-  try {
-    const user = await User.findByIdAndDelete(req.userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Usuario no encontrado'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Cuenta eliminada permanentemente'
-    });
-  } catch (error) {
-    console.error('Error al eliminar cuenta:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al eliminar la cuenta'
-    });
-  }
-});
+console.log('✅ Rutas de usuarios configuradas');
 
 module.exports = router;

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function Perfil() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('solicitudes');
+  const [activeTab, setActiveTab] = useState('publicaciones');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     nombre: '',
@@ -14,10 +15,21 @@ function Perfil() {
     ubicacion: ''
   });
   const [notification, setNotification] = useState('');
+  
+  // Estados para publicaciones
+  const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsCount, setPostsCount] = useState(0);
 
   useEffect(() => {
     cargarPerfil();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'publicaciones' && user) {
+      cargarPublicaciones();
+    }
+  }, [activeTab, user]);
 
   const cargarPerfil = async () => {
     const token = localStorage.getItem('token');
@@ -61,6 +73,63 @@ function Perfil() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cargarPublicaciones = async () => {
+    setPostsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        'http://127.0.0.1:5000/api/posts/user/my-posts',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log('📦 Respuesta del servidor:', response.data);
+      
+      // ✅ CORRECCIÓN: Acceder correctamente a los posts
+      if (response.data.success && response.data.data) {
+        const postsArray = response.data.data.posts || [];
+        console.log('✅ Posts encontrados:', postsArray.length);
+        console.log('Posts:', postsArray);
+        setPosts(postsArray);
+        setPostsCount(postsArray.length);
+      } else {
+        console.log('⚠️ No hay posts o respuesta inválida');
+        setPosts([]);
+        setPostsCount(0);
+      }
+    } catch (err) {
+      console.error('❌ Error al cargar publicaciones:', err);
+      setPosts([]);
+      setPostsCount(0);
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('¿Estás seguro de eliminar esta publicación?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `http://127.0.0.1:5000/api/posts/${postId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setPosts(prev => prev.filter(post => post._id !== postId));
+      setPostsCount(prev => prev - 1);
+      showNotification('✅ Publicación eliminada');
+    } catch (err) {
+      console.error('Error al eliminar:', err);
+      showNotification('❌ Error al eliminar la publicación');
     }
   };
 
@@ -112,6 +181,33 @@ function Perfil() {
     setTimeout(() => setNotification(''), 5000);
   };
 
+  // ✅ FUNCIONES AUXILIARES
+  const formatTimeAgo = (date) => {
+    if (!date) return 'reciente';
+    try {
+      const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+      if (seconds < 60) return 'hace un momento';
+      if (seconds < 3600) return `hace ${Math.floor(seconds / 60)} min`;
+      if (seconds < 86400) return `hace ${Math.floor(seconds / 3600)} h`;
+      if (seconds < 2592000) return `hace ${Math.floor(seconds / 86400)} d`;
+      return `hace ${Math.floor(seconds / 2592000)} m`;
+    } catch {
+      return 'reciente';
+    }
+  };
+
+  const getTypeText = (type) => {
+    const types = {
+      story: '📖 Historia',
+      tip: '💡 Consejo',
+      adoption: '🏠 Adopción',
+      update: '📢 Actualización',
+      question: '❓ Pregunta',
+      celebration: '🎉 Celebración'
+    };
+    return types[type] || '📝 Publicación';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -142,7 +238,7 @@ function Perfil() {
   const userName = user.nombre || user.name || 'Usuario';
   const userEmail = user.email || 'email@ejemplo.com';
   const userBio = user.bio || 'Amante de los animales 🐾';
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=200&background=random`;
+  const avatarUrl = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=200&background=random`;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -155,7 +251,6 @@ function Perfil() {
             </a>
             <ul className="hidden md:flex space-x-8">
               <li><a href="/" className="text-white font-medium hover:-translate-y-1 transition-transform duration-300 inline-block">Inicio</a></li>
-              
               <li>
                 <button 
                   onClick={handleLogout}
@@ -172,10 +267,8 @@ function Perfil() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
-          {/* Cover Image */}
           <div className="h-48 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700"></div>
           
-          {/* Profile Info */}
           <div className="relative px-6 pb-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-20">
               <div className="relative group">
@@ -205,15 +298,14 @@ function Perfil() {
                 <div className="text-3xl font-bold text-purple-600">12</div>
                 <div className="text-sm text-gray-600">Información</div>
               </div>
-                            <div 
-                onClick={() => window.location.href = '../pages/favoritos.jsx'}
-                className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition-all hover:scale-105">
                 <div className="text-4xl font-bold text-cyan-600 mb-2">8</div>
                 <div className="text-sm font-semibold text-gray-700">Favoritos</div>
               </div>
-
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="text-3xl font-bold text-pink-600">25</div>
+              <div 
+                onClick={() => setActiveTab('publicaciones')}
+                className="bg-pink-50 rounded-xl p-4 cursor-pointer hover:bg-pink-100 transition">
+                <div className="text-3xl font-bold text-pink-600">{postsCount}</div>
                 <div className="text-sm text-gray-600">Publicaciones</div>
               </div>
             </div>
@@ -223,6 +315,15 @@ function Perfil() {
         {/* Tabs Section */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
           <div className="flex border-b border-gray-200">
+            <button 
+              onClick={() => setActiveTab('publicaciones')}
+              className={`flex-1 px-6 py-4 text-sm font-semibold border-b-2 transition-colors duration-300 ${
+                activeTab === 'publicaciones' 
+                  ? 'border-purple-600 bg-purple-50 text-gray-700' 
+                  : 'border-transparent text-gray-500 hover:bg-gray-50'
+              }`}>
+              📱 Publicaciones
+            </button>
             <button 
               onClick={() => setActiveTab('solicitudes')}
               className={`flex-1 px-6 py-4 text-sm font-semibold border-b-2 transition-colors duration-300 ${
@@ -244,6 +345,112 @@ function Perfil() {
           </div>
 
           <div className="p-6">
+            {/* Tab: Publicaciones */}
+            {activeTab === 'publicaciones' && (
+              <div>
+                {postsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-4">🔄</div>
+                    <p className="text-gray-600">Cargando publicaciones...</p>
+                  </div>
+                ) : posts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📭</div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">No tienes publicaciones aún</h3>
+                    <p className="text-gray-600 mb-4">Empieza a compartir historias de mascotas</p>
+                    <a 
+                      href="/publicar"
+                      className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600">
+                      Crear Publicación
+                    </a>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {posts.map(post => (
+                      <div key={post._id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
+                        {/* Post Header */}
+                        <div className="p-4 flex items-center justify-between border-b">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={post.author?.avatar || avatarUrl}
+                              alt={post.author?.name || userName}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                            <div>
+                              <p className="font-semibold">{post.author?.name || userName}</p>
+                              <p className="text-xs text-gray-500">{formatTimeAgo(post.createdAt)}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeletePost(post._id)}
+                            className="text-gray-400 hover:text-red-500 transition"
+                            title="Eliminar publicación"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+
+                        {/* Post Images */}
+                        {post.images && post.images.length > 0 && (
+                          <div className="w-full">
+                            <img 
+                              src={`http://localhost:5000${post.images[0].url || post.images[0]}`}
+                              alt="Publicación"
+                              className="w-full h-auto max-h-96 object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Post Content */}
+                        <div className="p-4">
+                          {post.title && (
+                            <h3 className="text-lg font-bold mb-2">{post.title}</h3>
+                          )}
+                          {post.content && (
+                            <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
+                          )}
+
+                          {/* Post Type Badge */}
+                          <span className="inline-block mt-3 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                            {getTypeText(post.type)}
+                          </span>
+
+                          {/* Tags */}
+                          {post.tags && post.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {post.tags.map((tag, idx) => (
+                                <span key={idx} className="text-sm text-purple-600">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Location */}
+                          {post.location && (post.location.city || post.location.country) && (
+                            <p className="mt-2 text-sm text-gray-500">
+                              📍 {post.location.city}{post.location.country && `, ${post.location.country}`}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Post Stats */}
+                        <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between text-sm">
+                          <span className="text-gray-600">❤️ {post.stats?.likesCount || 0} Me gusta</span>
+                          <span className="text-gray-600">💬 {post.stats?.commentsCount || 0} Comentarios</span>
+                          <span className="text-gray-600">🔗 {post.stats?.sharesCount || 0} Compartidos</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab: Solicitudes */}
             {activeTab === 'solicitudes' && (
               <div className="space-y-4">
                 <div className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:bg-gray-100 transition-all duration-300">
@@ -266,30 +473,10 @@ function Perfil() {
                     </button>
                   </div>
                 </div>
-
-                <div className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:bg-gray-100 transition-all duration-300">
-                  <img 
-                    src="https://ui-avatars.com/api/?name=Carlos+Lopez&size=80&background=random"
-                    alt="Usuario" 
-                    className="w-16 h-16 rounded-full border-2 border-cyan-300"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800">Carlos López</h3>
-                    <p className="text-gray-600 text-sm">Interesado en adoptar a <span className="font-semibold">Max</span></p>
-                    <p className="text-gray-500 text-xs mt-1">Hace 5 horas</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition-all duration-300">
-                      Aceptar
-                    </button>
-                    <button className="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300">
-                      Rechazar
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
 
+            {/* Tab: Historial */}
             {activeTab === 'historial' && (
               <div className="space-y-4">
                 <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-6">
@@ -299,28 +486,6 @@ function Perfil() {
                       <h3 className="text-lg font-bold text-gray-800 mb-1">Adopción exitosa</h3>
                       <p className="text-gray-700">Michi fue adoptado por Ana Martínez</p>
                       <p className="text-gray-500 text-sm mt-2">15 de Octubre, 2024</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="text-3xl">📝</div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1">Publicación creada</h3>
-                      <p className="text-gray-700">Publicaste a Max en adopción</p>
-                      <p className="text-gray-500 text-sm mt-2">20 de Septiembre, 2024</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="text-3xl">🎉</div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1">Bienvenido a AdoptaPet</h3>
-                      <p className="text-gray-700">Te registraste en la plataforma</p>
-                      <p className="text-gray-500 text-sm mt-2">1 de Septiembre, 2024</p>
                     </div>
                   </div>
                 </div>
@@ -391,28 +556,6 @@ function Perfil() {
                 <p className="text-sm text-gray-500 mt-1">Máximo 200 caracteres</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Teléfono (opcional)</label>
-                <input 
-                  type="tel"
-                  value={editForm.telefono}
-                  onChange={(e) => setEditForm({...editForm, telefono: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                  placeholder="+57 300 123 4567"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Ubicación (opcional)</label>
-                <input 
-                  type="text"
-                  value={editForm.ubicacion}
-                  onChange={(e) => setEditForm({...editForm, ubicacion: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                  placeholder="Ciudad, País"
-                />
-              </div>
-
               <div className="flex gap-4 pt-4">
                 <button 
                   onClick={() => setShowEditModal(false)}
@@ -432,7 +575,7 @@ function Perfil() {
 
       {/* Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
           {notification}
         </div>
       )}

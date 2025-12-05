@@ -87,7 +87,7 @@ const CuentaModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         {/* Header con gradiente */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+        <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 p-6 text-white">
           <div className="flex items-center justify-between">
             <button 
               onClick={onClose}
@@ -142,7 +142,7 @@ const CuentaModal = ({ isOpen, onClose }) => {
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-60">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full m-4">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+            <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 p-6 text-white">
               <div className="flex items-center justify-between">
                 <button 
                   onClick={() => setShowPasswordModal(false)}

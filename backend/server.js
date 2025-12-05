@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http'); // ← NUEVO: Para Socket.io
+const http = require('http');
 const cors = require('cors');
 const session = require('express-session');
 const helmet = require('helmet');
@@ -8,13 +8,23 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
+// ============================================
+// INICIALIZACIÓN
+// ============================================
 console.log('🚀 Iniciando Adoptapet Backend v2.0...');
 
 const app = express();
-const server = http.createServer(app); // ← NUEVO: Crear servidor HTTP
+const server = http.createServer(app);
+
+// Estado de servicios
+const services = {
+  mongoConnected: false,
+  passportLoaded: false,
+  socketLoaded: false
+};
 
 // ============================================
-// 1. CORS - DEBE IR PRIMERO ⚠️
+// 1. CORS
 // ============================================
 app.use(cors({
   origin: true,
@@ -24,26 +34,28 @@ app.use(cors({
 }));
 
 // ============================================
-// 2. HELMET - Seguridad de headers
+// 2. SEGURIDAD
 // ============================================
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
 
-// ============================================
-// 3. COMPRESIÓN
-// ============================================
 app.use(compression());
 
 // ============================================
-// 4. BODY PARSERS
+// 3. PARSERS
 // ============================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============================================
-// 5. PROTECCIÓN NoSQL INJECTION
+// SERVIR ARCHIVOS ESTÁTICOS (IMÁGENES)
+// ============================================
+app.use('/uploads', express.static('uploads'));
+
+// ============================================
+// 4. PROTECCIÓN NOSQL INJECTION
 // ============================================
 app.use((req, res, next) => {
   const sanitize = (obj) => {
@@ -69,9 +81,9 @@ app.use((req, res, next) => {
 console.log('✅ Protección NoSQL Injection activada');
 
 // ============================================
-// 6. RATE LIMITING
+// 5. RATE LIMITING
 // ============================================
-const limiter = rateLimit({
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
   message: { 
@@ -81,7 +93,6 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/', limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -95,8 +106,10 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use('/api/', apiLimiter);
+
 // ============================================
-// 7. CONFIGURACIÓN DE SESIONES
+// 6. SESIONES
 // ============================================
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'adoptapet-secret-2024-change-this',
@@ -122,16 +135,15 @@ if (process.env.NODE_ENV === 'production' && process.env.MONGO_URI) {
 app.use(session(sessionConfig));
 
 // ============================================
-// 8. PASSPORT
+// 7. PASSPORT
 // ============================================
 let passport;
-let passportLoaded = false;
 
 try {
   passport = require('./src/config/passport');
   app.use(passport.initialize());
   app.use(passport.session());
-  passportLoaded = true;
+  services.passportLoaded = true;
   console.log('✅ Passport cargado correctamente');
 } catch (error) {
   console.error('❌ Error al cargar Passport:', error.message);
@@ -139,10 +151,8 @@ try {
 }
 
 // ============================================
-// 9. MONGODB
+// 8. MONGODB
 // ============================================
-let mongoConnected = false;
-
 (async () => {
   try {
     const mongoose = require('mongoose');
@@ -151,7 +161,7 @@ let mongoConnected = false;
     
     const { connectDB } = require('./src/config/database');
     await connectDB();
-    mongoConnected = true;
+    services.mongoConnected = true;
     console.log('✅ MongoDB conectado correctamente');
   } catch (error) {
     console.error('❌ Error conectando a MongoDB:', error.message);
@@ -160,15 +170,15 @@ let mongoConnected = false;
 })();
 
 // ============================================
-// 10. SOCKET.IO - NUEVO 🔌
+// 9. SOCKET.IO
 // ============================================
 let io;
-let socketLoaded = false;
 
 try {
   const { initializeSocket } = require('./src/utils/socket');
   io = initializeSocket(server);
-  socketLoaded = true;
+  services.socketLoaded = true;
+  app.set('io', io);
   console.log('✅ Socket.io inicializado correctamente');
 } catch (error) {
   console.error('❌ Error al cargar Socket.io:', error.message);
@@ -176,7 +186,7 @@ try {
 }
 
 // ============================================
-// 11. LOGGING
+// 10. LOGGING
 // ============================================
 const logger = require('./src/utils/logger');
 
@@ -192,7 +202,7 @@ app.use((req, res, next) => {
 });
 
 // ============================================
-// RUTAS BÁSICAS
+// RUTAS DE ESTADO
 // ============================================
 app.get('/health', (req, res) => {
   const health = {
@@ -203,9 +213,9 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     services: {
       api: 'operational',
-      mongodb: mongoConnected ? 'connected' : 'disconnected',
-      googleAuth: passportLoaded ? 'enabled' : 'disabled',
-      socketio: socketLoaded ? 'active' : 'inactive' // ← NUEVO
+      mongodb: services.mongoConnected ? 'connected' : 'disconnected',
+      googleAuth: services.passportLoaded ? 'enabled' : 'disabled',
+      socketio: services.socketLoaded ? 'active' : 'inactive'
     },
     memory: {
       used: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
@@ -228,7 +238,8 @@ app.get('/api/info', (req, res) => {
       pets: '/api/pets',
       users: '/api/users',
       applications: '/api/applications',
-      chat: '/api/chat' // ← NUEVO
+      chat: '/api/chat',
+      posts: '/api/posts'
     }
   });
 });
@@ -240,9 +251,9 @@ app.get('/test/config', (req, res) => {
     config: {
       nodeEnv: process.env.NODE_ENV || 'development',
       port: process.env.PORT || 5000,
-      passport: passportLoaded ? '✅ Cargado' : '❌ NO cargado',
-      mongodb: mongoConnected ? '✅ Conectado' : '❌ Desconectado',
-      socketio: socketLoaded ? '✅ Activo' : '❌ Inactivo', // ← NUEVO
+      passport: services.passportLoaded ? '✅ Cargado' : '❌ NO cargado',
+      mongodb: services.mongoConnected ? '✅ Conectado' : '❌ Desconectado',
+      socketio: services.socketLoaded ? '✅ Activo' : '❌ Inactivo',
       session: '✅ Configurado',
       googleClientId: process.env.GOOGLE_CLIENT_ID ? '✅ Configurado' : '❌ NO configurado',
       googleSecret: process.env.GOOGLE_CLIENT_SECRET ? '✅ Configurado' : '❌ NO configurado',
@@ -255,7 +266,7 @@ app.get('/test/config', (req, res) => {
 // ============================================
 // RUTAS DE GOOGLE OAUTH
 // ============================================
-if (passportLoaded) {
+if (services.passportLoaded) {
   app.get('/auth/google', 
     passport.authenticate('google', { 
       scope: ['profile', 'email']
@@ -409,9 +420,14 @@ try {
   logger.log.warning('Rutas de solicitudes no disponibles');
 }
 
-// ============================================
-// RUTAS DE CHAT - NUEVO 💬
-// ============================================
+try {
+  const postRoutes = require('./src/routes/postRoutes');
+  app.use('/api/posts', postRoutes);
+  logger.log.success('Rutas de posts cargadas');
+} catch (error) {
+  logger.log.warning('Rutas de posts no disponibles');
+  console.error('Error detallado:', error.message);
+}
 try {
   const chatRoutes = require('./src/routes/chatRoutes');
   app.use('/api/chat', chatRoutes);
@@ -422,7 +438,7 @@ try {
 }
 
 // ============================================
-// MANEJO DE ERRORES 404 (para rutas API)
+// MANEJO DE ERRORES 404
 // ============================================
 app.use((req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
@@ -435,6 +451,40 @@ app.use((req, res, next) => {
     next();
   }
 });
+// ==========================================
+// RUTA DE REDIRECCIÓN POST-LOGIN GOOGLE
+// ==========================================
+app.get('/Home', (req, res) => {
+  const { token, user } = req.query;
+  
+  console.log('🏠 Redirigiendo después del login de Google');
+  console.log('   Token:', token ? '✅' : '❌');
+  console.log('   User:', user ? '✅' : '❌');
+  
+  if (!token || !user) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return res.redirect(`${frontendUrl}/login?error=missing_credentials`);
+  }
+
+  try {
+    const userData = JSON.parse(decodeURIComponent(user));
+    console.log('✅ Usuario válido:', userData.email);
+    
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const redirectUrl = `${frontendUrl}/home?token=${token}&user=${user}`;
+    
+    console.log('🔄 Redirigiendo a frontend:', redirectUrl);
+    res.redirect(redirectUrl);
+    
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/login?error=invalid_data`);
+  }
+});
+
+
+
 
 // ============================================
 // MIDDLEWARE DE MANEJO DE ERRORES GLOBAL
@@ -500,19 +550,19 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
-// INICIAR SERVIDOR - MODIFICADO PARA USAR server
+// INICIAR SERVIDOR
 // ============================================
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-server.listen(PORT, HOST, () => { // ← CAMBIO: server en lugar de app
+server.listen(PORT, HOST, () => {
   logger.showStartupBanner({
     port: PORT,
     host: HOST,
     env: process.env.NODE_ENV || 'development',
-    passportLoaded,
-    mongoConnected,
-    socketLoaded // ← NUEVO
+    passportLoaded: services.passportLoaded,
+    mongoConnected: services.mongoConnected,
+    socketLoaded: services.socketLoaded
   });
 });
 
@@ -522,17 +572,16 @@ server.listen(PORT, HOST, () => { // ← CAMBIO: server en lugar de app
 const gracefulShutdown = (signal) => {
   logger.showShutdown(signal);
   
-  server.close(async () => { // ← CAMBIO: server en lugar de app
+  server.close(async () => {
     logger.log.success('Servidor HTTP cerrado');
     
-    // Cerrar Socket.io
-    if (socketLoaded && io) {
+    if (services.socketLoaded && io) {
       io.close(() => {
         logger.log.success('Socket.io cerrado');
       });
     }
     
-    if (mongoConnected) {
+    if (services.mongoConnected) {
       try {
         const mongoose = require('mongoose');
         await mongoose.connection.close();

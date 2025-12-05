@@ -11,6 +11,11 @@ import PublishFooter from "../components/common/PublishFooter";
 const Publicar = () => {
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  
   const [petData, setPetData] = useState({
     nombre: "",
     tipo: "",
@@ -21,42 +26,196 @@ const Publicar = () => {
 
   const handleImage = (e) => {
     const file = e.target.files[0];
-    if (file) setImage(URL.createObjectURL(file));
+    if (file) {
+      setImage(URL.createObjectURL(file));
+      setImageFile(file);
+    }
   };
 
-  const clearImage = () => setImage(null);
+  const clearImage = () => {
+    setImage(null);
+    setImageFile(null);
+  };
 
-  const publish = () => {
-    console.log("Publicando...");
-    console.log({ text, image, petData });
+  const publish = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      // Validaciones
+      if (!text.trim() && !imageFile) {
+        setError("Debes escribir algo o subir una imagen");
+        setLoading(false);
+        return;
+      }
+
+      // Obtener token del usuario
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("Debes iniciar sesión para publicar");
+        setLoading(false);
+        return;
+      }
+
+      // Crear FormData para enviar imagen y datos
+      const formData = new FormData();
+      formData.append('contenido', text);
+      formData.append('tipo', petData.adopcion ? 'adoption-story' : 'update');
+      
+      // Si hay imagen, agregarla
+      if (imageFile) {
+        formData.append('imagen', imageFile);
+      }
+
+      // Si hay información de mascota, agregarla
+      if (petData.nombre || petData.tipo || petData.raza || petData.edad) {
+        formData.append('petInfo', JSON.stringify({
+          nombre: petData.nombre,
+          tipo: petData.tipo,
+          raza: petData.raza,
+          edad: petData.edad
+        }));
+      }
+
+      formData.append('disponibleAdopcion', petData.adopcion);
+
+      // Enviar al backend
+      const response = await fetch('http://localhost:5000/api/posts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al publicar');
+      }
+
+      console.log('✅ Publicación creada:', data);
+
+      // Limpiar formulario
+      setText("");
+      setImage(null);
+      setImageFile(null);
+      setPetData({
+        nombre: "",
+        tipo: "",
+        raza: "",
+        edad: "",
+        adopcion: false,
+      });
+
+      setSuccess(true);
+      
+      // Redirigir al inicio después de 2 segundos
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 2000);
+
+    } catch (err) {
+      console.error('❌ Error al publicar:', err);
+      setError(err.message || 'Error al publicar. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-20 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-3 md:px-4 pt-4 md:pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+      <div className="max-w-7xl mx-auto px-4 pt-20 pb-24 lg:pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* SIDEBAR IZQUIERDO - 3 columnas */}
-          <div className="hidden md:block md:col-span-3">
+          <div className="hidden lg:block lg:col-span-3">
             <Sidebar />
           </div>
 
           {/* CONTENIDO PRINCIPAL - 9 columnas */}
-          <main className="col-span-1 md:col-span-9">
-            <div className="bg-white rounded-3xl shadow-lg p-4 md:p-6">
-              <PublishTextarea value={text} setValue={setText} />
-              <ImagePreview image={image} clearImage={clearImage} />
-              <PetInfo petData={petData} setPetData={setPetData} />
-              <PublishOptions handleImage={handleImage} />
-              <PublishFooter publish={publish} />
+          <div className="lg:col-span-9">
+            <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+              
+              {/* Título */}
+              <div className="border-b pb-4">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  📝 Crear Publicación
+                </h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  Comparte momentos con tus mascotas
+                </p>
+              </div>
+
+              {/* Mensajes de estado */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <span>✅</span>
+                  <span>¡Publicación creada exitosamente! Redirigiendo...</span>
+                </div>
+              )}
+
+              {/* Área de texto - ✅ CORREGIDO */}
+              <PublishTextarea 
+                value={text}
+                setValue={setText}
+                disabled={loading}
+              />
+
+              {/* Preview de imagen */}
+              {image && (
+                <ImagePreview 
+                  image={image} 
+                  clearImage={clearImage}
+                  disabled={loading}
+                />
+              )}
+
+              {/* Información de mascota */}
+              <PetInfo 
+                petData={petData} 
+                setPetData={setPetData}
+                disabled={loading}
+              />
+
+              {/* Opciones de publicación */}
+              <PublishOptions 
+                handleImage={handleImage}
+                disabled={loading}
+              />
+
+              {/* Footer con botón publicar */}
+              <PublishFooter 
+                publish={publish}
+                loading={loading}
+                disabled={loading || (!text.trim() && !imageFile)}
+              />
+
+              {/* Indicador de carga */}
+              {loading && (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                  <p className="text-gray-600 mt-2">Publicando...</p>
+                </div>
+              )}
+
             </div>
-          </main>
-          
+          </div>
+
         </div>
       </div>
 
+      {/* Bottom Navigation Mobile */}
       <BottomNav />
     </div>
   );

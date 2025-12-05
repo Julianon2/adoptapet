@@ -1,5 +1,5 @@
 import express from "express";
-import Ajustes from "../models/Ajustes.js";
+import Ajustes from "../models/ajustes";
 import auth from "../middleware/auth.js"; // middleware de autenticación
 
 const router = express.Router();

@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const favoritesRoutes = require("./routes/favorites");
+
 
 // ============================================
 // INICIALIZACIÓN
@@ -48,6 +50,9 @@ app.use(compression());
 // ============================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+
+
 
 // ============================================
 // SERVIR ARCHIVOS ESTÁTICOS (IMÁGENES)

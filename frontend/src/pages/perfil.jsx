@@ -40,7 +40,7 @@ function Perfil() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('http://localhost:5000/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -293,12 +293,9 @@ function Perfil() {
             </div>
             
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-8 text-center">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="text-3xl font-bold text-purple-600">12</div>
-                <div className="text-sm text-gray-600">Información</div>
-              </div>
-              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+            <div className="grid grid-cols-2 gap-4 mt-8 text-center">
+            
+              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6  cursor-pointer hover:shadow-lg transition-all hover:scale-105">
                 <div className="text-4xl font-bold text-cyan-600 mb-2">8</div>
                 <div className="text-sm font-semibold text-gray-700">Favoritos</div>
               </div>

@@ -34,6 +34,21 @@ const PetCard = ({ pet, onClick }) => {
 
     const statusBadge = getStatusBadge();
 
+
+    const toggleFavorite = async () => {
+  const endpoint = isFavorite ? "/favorites/remove" : "/favorites/add";
+
+  await fetch(`http://localhost:4000${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, petId: pet._id }),
+  });
+
+  setIsFavorite(!isFavorite);
+};
+
+
+
     return (
         <div 
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"

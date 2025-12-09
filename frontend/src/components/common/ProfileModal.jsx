@@ -34,42 +34,7 @@ export default function ProfileModal({ friend, onClose, onSendMessage, onRemoveF
           </div>
 
           {/* Información del perfil */}
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-3 text-gray-600">
-              <MapPin className="w-5 h-5 text-purple-800" />
-              <span>{friend.location}</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-600">
-              <Calendar className="w-5 h-5 text-purple-800" />
-              <span>Amigos desde {friend.friendsSince}</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-600">
-              <Users className="w-5 h-5 text-purple-800" />
-              <span>{friend.mutualFriends} amigos en común</span>
-            </div>
-          </div>
-
-          {/* Bio */}
-          {friend.bio && (
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2">Acerca de</h3>
-              <p className="text-gray-600 bg-gray-50 p-4 rounded-xl">{friend.bio}</p>
-            </div>
-          )}
-
-          {/* Intereses */}
-          {friend.interests && friend.interests.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2">Intereses</h3>
-              <div className="flex flex-wrap gap-2">
-                {friend.interests.map((interest, index) => (
-                  <span key={index} className="bg-gradient-to-r from-blue-100 to-pink-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold">
-                    {interest}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          
 
           {/* Botones de acción */}
           <div className="flex gap-3">

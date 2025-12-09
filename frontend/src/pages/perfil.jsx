@@ -44,11 +44,7 @@ function Perfil() {
     }
 
     try {
-<<<<<<< HEAD
-      const response = await fetch('http://localhost:5000/profile', {
-=======
       const response = await fetch('http://127.0.0.1:5000/profile', {
->>>>>>> c3758e67bf87f2ea5a4d2fc9db389d7e6f17e7b6
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -155,14 +151,14 @@ function Perfil() {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       showNotification('❌ Solo se permiten imágenes (JPG, PNG, GIF, WEBP)');
-      e.target.value = ''; // Limpiar input
+      e.target.value = '';
       return;
     }
 
     // Validar tamaño (5MB máximo)
     if (file.size > 5 * 1024 * 1024) {
       showNotification('❌ La imagen no puede superar los 5MB');
-      e.target.value = ''; // Limpiar input
+      e.target.value = '';
       return;
     }
 
@@ -196,7 +192,6 @@ function Perfil() {
       console.log('📦 Datos recibidos:', data);
 
       if (response.ok && data.success) {
-        // Actualizar usuario con nuevo avatar
         const updatedUser = {
           ...user,
           avatar: `http://127.0.0.1:5000${data.avatar}`
@@ -213,7 +208,7 @@ function Perfil() {
       showNotification('❌ Error al subir la imagen. Revisa la consola para más detalles.');
     } finally {
       setIsUploadingAvatar(false);
-      e.target.value = ''; // Limpiar input
+      e.target.value = '';
     }
   };
 
@@ -361,7 +356,6 @@ function Perfil() {
                   className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg object-cover"
                 />
                 
-                {/* Overlay para cambiar foto */}
                 <div 
                   onClick={handleAvatarClick}
                   className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -377,7 +371,6 @@ function Perfil() {
                   </div>
                 </div>
                 
-                {/* Input oculto para seleccionar archivo */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -401,10 +394,8 @@ function Perfil() {
               </button>
             </div>
             
-            {/* Stats */}
             <div className="grid grid-cols-2 gap-4 mt-8 text-center">
-            
-              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6  cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
                 <div className="text-4xl font-bold text-cyan-600 mb-2">8</div>
                 <div className="text-sm font-semibold text-gray-700">Favoritos</div>
               </div>
@@ -451,7 +442,6 @@ function Perfil() {
           </div>
 
           <div className="p-6">
-            {/* Tab: Publicaciones */}
             {activeTab === 'publicaciones' && (
               <div>
                 {postsLoading ? (
@@ -474,7 +464,6 @@ function Perfil() {
                   <div className="space-y-4">
                     {posts.map(post => (
                       <div key={post._id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
-                        {/* Post Header */}
                         <div className="p-4 flex items-center justify-between border-b">
                           <div className="flex items-center gap-3">
                             <img 
@@ -496,11 +485,10 @@ function Perfil() {
                           </button>
                         </div>
 
-                        {/* Post Images */}
                         {post.images && post.images.length > 0 && (
                           <div className="w-full">
                             <img 
-                              src={`http://localhost:5000${post.images[0].url || post.images[0]}`}
+                              src={`http://127.0.0.1:5000${post.images[0].url || post.images[0]}`}
                               alt="Publicación"
                               className="w-full h-auto max-h-96 object-cover"
                               onError={(e) => {
@@ -510,7 +498,6 @@ function Perfil() {
                           </div>
                         )}
 
-                        {/* Post Content */}
                         <div className="p-4">
                           {post.title && (
                             <h3 className="text-lg font-bold mb-2">{post.title}</h3>
@@ -519,12 +506,10 @@ function Perfil() {
                             <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
                           )}
 
-                          {/* Post Type Badge */}
                           <span className="inline-block mt-3 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
                             {getTypeText(post.type)}
                           </span>
 
-                          {/* Tags */}
                           {post.tags && post.tags.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-3">
                               {post.tags.map((tag, idx) => (
@@ -535,7 +520,6 @@ function Perfil() {
                             </div>
                           )}
 
-                          {/* Location */}
                           {post.location && (post.location.city || post.location.country) && (
                             <p className="mt-2 text-sm text-gray-500">
                               📍 {post.location.city}{post.location.country && `, ${post.location.country}`}
@@ -543,7 +527,6 @@ function Perfil() {
                           )}
                         </div>
 
-                        {/* Post Stats */}
                         <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between text-sm">
                           <span className="text-gray-600">❤️ {post.stats?.likesCount || 0} Me gusta</span>
                           <span className="text-gray-600">💬 {post.stats?.commentsCount || 0} Comentarios</span>
@@ -556,7 +539,6 @@ function Perfil() {
               </div>
             )}
 
-            {/* Tab: Solicitudes */}
             {activeTab === 'solicitudes' && (
               <div className="space-y-4">
                 <div className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:bg-gray-100 transition-all duration-300">
@@ -582,7 +564,6 @@ function Perfil() {
               </div>
             )}
 
-            {/* Tab: Historial */}
             {activeTab === 'historial' && (
               <div className="space-y-4">
                 <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-6">
@@ -601,12 +582,10 @@ function Perfil() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 text-center mt-12">
         <p>&copy; 2025 AdoptaPet. Todos los derechos reservados. Hecho con ❤️ para las mascotas.</p>
       </footer>
 
-      {/* Modal de Editar Perfil */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -697,7 +676,6 @@ function Perfil() {
         </div>
       )}
 
-      {/* Notification */}
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
           {notification}

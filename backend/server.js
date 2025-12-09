@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const favoritesRoutes = require("./routes/favorites");
+const favoritesRoutes = require("./src/routes/favoritos");
 
 
 

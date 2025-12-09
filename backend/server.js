@@ -10,6 +10,7 @@ const path = require('path');
 const favoritesRoutes = require("./routes/favorites");
 
 
+
 // ============================================
 // INICIALIZACIÓN
 // ============================================
@@ -58,7 +59,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // SERVIR ARCHIVOS ESTÁTICOS (IMÁGENES)
 // ============================================
 app.use('/uploads', express.static('uploads'));
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ============================================
 // 4. PROTECCIÓN NOSQL INJECTION
 // ============================================

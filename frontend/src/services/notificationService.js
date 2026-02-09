@@ -10,15 +10,11 @@ const getAuthHeaders = () => {
 
 export const notificationService = {
   // Obtener todas las notificaciones
-  getNotifications: async (page = 1, limit = 20, filters = {}) => {
+  getNotifications: async (page = 1, limit = 50, filters = {}) => {
     try {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...filters
-      });
+      console.log('🔍 Obteniendo notificaciones...');
       
-      const response = await fetch(`${API_URL}/notifications?${queryParams}`, {
+      const response = await fetch(`${API_URL}/notifications`, {
         headers: getAuthHeaders()
       });
       
@@ -27,20 +23,16 @@ export const notificationService = {
       }
       
       const data = await response.json();
+      console.log('📦 Notificaciones recibidas:', data);
       
-      // ✅ Manejar ambos formatos de respuesta
-      if (data.success !== undefined) {
-        if (!data.success) {
-          throw new Error(data.message || 'Error al obtener notificaciones');
-        }
-        return data.data;
-      }
-      
-      // Si no tiene formato {success, data}, devolver directamente
-      return Array.isArray(data) ? data : [];
+      // El backend devuelve un array directamente
+      return {
+        notifications: Array.isArray(data) ? data : [],
+        unreadCount: Array.isArray(data) ? data.filter(n => !n.read).length : 0
+      };
     } catch (error) {
       console.error('❌ Error en getNotifications:', error);
-      throw error;
+      return { notifications: [], unreadCount: 0 };
     }
   },
 
@@ -52,15 +44,10 @@ export const notificationService = {
       });
       
       if (!response.ok) {
-        return 0; // Si falla, devolver 0
+        return 0;
       }
       
       const data = await response.json();
-      
-      if (data.success !== undefined) {
-        return data.success ? data.data.count : 0;
-      }
-      
       return data.count || 0;
     } catch (error) {
       console.error('❌ Error en getUnreadCount:', error);
@@ -81,7 +68,7 @@ export const notificationService = {
       }
       
       const data = await response.json();
-      return data.notification || data.data?.notification || data;
+      return data.notification || data;
     } catch (error) {
       console.error('❌ Error en markAsRead:', error);
       throw error;
@@ -101,7 +88,7 @@ export const notificationService = {
       }
       
       const data = await response.json();
-      return data.count || data.data?.count || 0;
+      return data.count || 0;
     } catch (error) {
       console.error('❌ Error en markAllAsRead:', error);
       throw error;
@@ -140,7 +127,7 @@ export const notificationService = {
       }
       
       const data = await response.json();
-      return data.count || data.data?.count || 0;
+      return data.count || 0;
     } catch (error) {
       console.error('❌ Error en clearReadNotifications:', error);
       throw error;

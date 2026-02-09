@@ -19,6 +19,12 @@ const generateAvatarSVG = (name = 'U') => {
 };
 
 const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) => {
+    // ===== DEBUGGING TEMPORAL =====
+    console.log('🔍 PostCard - Post completo:', post);
+    console.log('👤 PostCard - Post author:', post.author);
+    console.log('📝 author.name:', post.author?.name);
+    console.log('📝 author.nombre:', post.author?.nombre);
+    
     // ===== VALIDACIÓN =====
     if (!post) {
         console.error('PostCard: post es null o undefined');
@@ -247,18 +253,18 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
                 <div className="flex items-center space-x-3">
                     <img
                         src={getAvatarUrl(post.author)}
-                        alt={post.author?.name || post.author?.nombre || 'Usuario'}
+                        alt={post.author?.nombre || post.author?.name || 'Usuario'}
                         className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
                         onError={(e) => {
                             e.target.onError = null;
-                            const name = post.author?.name || post.author?.nombre || 'U';
+                            const name = post.author?.nombre || post.author?.name || 'U';
                             e.target.src = generateAvatarSVG(name);
                         }}
                     />
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-gray-900">
-                                {post.author?.name || post.author?.nombre || 'Usuario'}
+                                {post.author?.nombre || post.author?.name || 'Usuario'}
                             </h3>
                             {post.author?.verified?.email && (
                                 <span className="text-blue-500 text-sm">✓</span>
@@ -418,7 +424,7 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
                             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                             onError={(e) => {
                                 e.target.onError = null;
-                                e.target.src = generateAvatarSVG(currentUser?.name || currentUser?.nombre || 'U');
+                                e.target.src = generateAvatarSVG(currentUser?.nombre || currentUser?.name || 'U');
                             }}
                         />
                         <div className="flex-1 flex gap-2">
@@ -446,16 +452,16 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
                                 <div key={comment._id || Math.random()} className="flex gap-2">
                                     <img
                                         src={getAvatarUrl(comment.user)}
-                                        alt={comment.user?.name || comment.user?.nombre || 'Usuario'}
+                                        alt={comment.user?.nombre || comment.user?.name || 'Usuario'}
                                         className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                         onError={(e) => {
                                             e.target.onError = null;
-                                            e.target.src = generateAvatarSVG(comment.user?.name || comment.user?.nombre || 'U');
+                                            e.target.src = generateAvatarSVG(comment.user?.nombre || comment.user?.name || 'U');
                                         }}
                                     />
                                     <div className="flex-1 bg-white rounded-lg px-3 py-2 shadow-sm">
                                         <h4 className="font-semibold text-sm text-gray-900">
-                                            {comment.user?.name || comment.user?.nombre || 'Usuario'}
+                                            {comment.user?.nombre || comment.user?.name || 'Usuario'}
                                         </h4>
                                         <p className="text-sm text-gray-800 mt-1">{comment.content}</p>
                                         <p className="text-xs text-gray-500 mt-1">

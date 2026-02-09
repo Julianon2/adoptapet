@@ -370,16 +370,16 @@ app.get('/api/avatar/:name', async (req, res) => {
 });
 
 // ============================================
-// RUTAS DE GOOGLE OAUTH
+// RUTAS DE GOOGLE OAUTH - ✅ CORREGIDAS
 // ============================================
 if (services.passportLoaded) {
-  app.get('/auth/google', 
+  app.get('/api/auth/google', 
     passport.authenticate('google', { 
       scope: ['profile', 'email']
     })
   );
 
-  app.get('/auth/google/callback', 
+  app.get('/api/auth/google/callback', 
     passport.authenticate('google', { 
       failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`,
       session: true
@@ -473,7 +473,7 @@ if (services.passportLoaded) {
   });
 
 } else {
-  app.get('/auth/google', (req, res) => {
+  app.get('/api/auth/google', (req, res) => {
     res.status(503).json({
       success: false,
       message: 'Google OAuth no disponible. Verifica la configuración.'
@@ -556,7 +556,7 @@ try {
   logger.log.warning('Rutas de favoritos no disponibles');
 }
 try {
-  const notificationRoutes = require('../backend/src/routes/Notificationroutes');
+  const notificationRoutes = require('./src/routes/notificationRoutes');
   app.use('/api/notifications', notificationRoutes);
   logger.log.success('Rutas de notificaciones cargadas');
 } catch (error) {

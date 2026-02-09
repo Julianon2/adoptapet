@@ -84,7 +84,7 @@ const auth = async (req, res, next) => {
 
     console.log('✅ Usuario autenticado:', {
       id: user._id,
-      nombre: user.nombre || user.name,
+      nombre: user.name,
       email: user.email
     });
 
@@ -102,8 +102,10 @@ const auth = async (req, res, next) => {
   }
 };
 
-// Importar modelo
+// Importar modelos
 const Post = require('../models/Post');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 // ============================================
 // RUTAS DE POSTS
@@ -123,7 +125,7 @@ router.get('/user/my-posts', auth, async (req, res) => {
       author: req.userId,
       status: 'active'
     })
-      .populate('author', 'nombre email avatar role')
+      .populate('author', 'name nombre email avatar role verified')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -135,6 +137,9 @@ router.get('/user/my-posts', auth, async (req, res) => {
     });
 
     console.log(`✅ Posts encontrados: ${posts.length}`);
+    if (posts.length > 0) {
+      console.log('👤 Primer post author:', posts[0].author);
+    }
 
     res.json({
       success: true,
@@ -168,8 +173,8 @@ router.get('/', auth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({ status: 'active' })
-      .populate('author', 'nombre email avatar role')
-      .populate('comments.user', 'nombre email avatar')
+      .populate('author', 'name nombre email avatar role verified')
+      .populate('comments.user', 'name nombre email avatar')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -201,7 +206,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// 1. CREAR PUBLICACIÓN (CORREGIDO PARA TU MODELO)
+// 1. CREAR PUBLICACIÓN
 router.post('/', auth, upload.single('imagen'), async (req, res) => {
   try {
     console.log('📝 ===== CREANDO NUEVA PUBLICACIÓN =====');
@@ -211,7 +216,6 @@ router.post('/', auth, upload.single('imagen'), async (req, res) => {
 
     const { contenido, tipo, petInfo, disponibleAdopcion } = req.body;
 
-    // Validación básica
     if (!contenido && !req.file) {
       console.log('❌ Validación fallida: Sin contenido ni imagen');
       return res.status(400).json({
@@ -220,7 +224,6 @@ router.post('/', auth, upload.single('imagen'), async (req, res) => {
       });
     }
 
-    // Crear objeto de publicación según TU modelo
     const postData = {
       author: req.userId,
       content: contenido || '',
@@ -244,30 +247,16 @@ router.post('/', auth, upload.single('imagen'), async (req, res) => {
       }
     };
 
-    // Si hay imagen, agregarla al array de images
     if (req.file) {
       postData.media.images.push(`/uploads/posts/${req.file.filename}`);
       console.log('✅ Imagen agregada:', postData.media.images[0]);
     }
 
-    // Si hay info de mascota, parsearla
-    if (petInfo) {
-      try {
-        const parsedPetInfo = typeof petInfo === 'string' ? JSON.parse(petInfo) : petInfo;
-        console.log('🐾 Info de mascota:', parsedPetInfo);
-      } catch (e) {
-        console.error('❌ Error parsing petInfo:', e);
-      }
-    }
-
     console.log('💾 Datos del post a guardar:', JSON.stringify(postData, null, 2));
 
-    // Crear el post
     const newPost = new Post(postData);
     await newPost.save();
-
-    // Poblar información del autor
-    await newPost.populate('author', 'nombre email avatar role');
+    await newPost.populate('author', 'name nombre email avatar role verified');
 
     console.log('✅ Post creado exitosamente:', newPost._id);
 
@@ -279,9 +268,6 @@ router.post('/', auth, upload.single('imagen'), async (req, res) => {
 
   } catch (error) {
     console.error('❌ ERROR CREANDO POST:', error);
-    console.error('   Mensaje:', error.message);
-    console.error('   Stack:', error.stack);
-    
     res.status(500).json({
       success: false,
       message: 'Error al crear la publicación',
@@ -300,8 +286,8 @@ router.get('/feed', auth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({ status: 'active' })
-      .populate('author', 'nombre email avatar role')
-      .populate('comments.user', 'nombre email avatar')
+      .populate('author', 'name nombre email avatar role verified')
+      .populate('comments.user', 'name nombre email avatar')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -345,7 +331,7 @@ router.get('/user/:userId', auth, async (req, res) => {
       author: req.params.userId,
       status: 'active'
     })
-      .populate('author', 'nombre email avatar role')
+      .populate('author', 'name nombre email avatar role verified')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -386,8 +372,8 @@ router.get('/:postId', auth, async (req, res) => {
     console.log('📄 Obteniendo post:', req.params.postId);
     
     const post = await Post.findById(req.params.postId)
-      .populate('author', 'nombre email avatar role')
-      .populate('comments.user', 'nombre email avatar')
+      .populate('author', 'name nombre email avatar role verified')
+      .populate('comments.user', 'name nombre email avatar')
       .lean();
 
     if (!post) {
@@ -412,21 +398,26 @@ router.get('/:postId', auth, async (req, res) => {
   }
 });
 
-// 5. DAR/QUITAR LIKE
+// 5. DAR/QUITAR LIKE (✅ CON NOTIFICACIONES CORREGIDAS)
 router.post('/:postId/like', auth, async (req, res) => {
   try {
-    console.log('❤️ Like en post:', req.params.postId);
+    console.log('❤️ ===== PROCESANDO LIKE =====');
+    console.log('📝 Post ID:', req.params.postId);
+    console.log('👤 Usuario:', req.userId);
     
     const post = await Post.findById(req.params.postId);
 
     if (!post) {
+      console.log('❌ Post no encontrado');
       return res.status(404).json({
         success: false,
         message: 'Publicación no encontrada'
       });
     }
 
-    // Verificar si ya dio like
+    console.log('📊 Post autor:', post.author.toString());
+    console.log('📊 Likes actuales:', post.stats.likes.length);
+
     const likeIndex = post.stats.likes.findIndex(
       like => like.toString() === req.userId.toString()
     );
@@ -434,18 +425,76 @@ router.post('/:postId/like', auth, async (req, res) => {
     let liked = false;
     
     if (likeIndex > -1) {
-      // Remover like
+      // QUITAR LIKE
       post.stats.likes.splice(likeIndex, 1);
       liked = false;
       console.log('💔 Like removido');
     } else {
-      // Agregar like
+      // AGREGAR LIKE
       post.stats.likes.push(req.userId);
       liked = true;
       console.log('❤️ Like agregado');
+
+      // ✅ CREAR NOTIFICACIÓN (solo si no eres tú mismo)
+      console.log('🔍 Verificando si crear notificación...');
+      console.log('   Post autor:', post.author.toString());
+      console.log('   Usuario actual:', req.userId.toString());
+      console.log('   ¿Son diferentes?', post.author.toString() !== req.userId.toString());
+      
+      if (post.author.toString() !== req.userId.toString()) {
+        try {
+          const liker = await User.findById(req.userId);
+          console.log('👤 Usuario que da like:', liker ? liker.name || liker.nombre : 'NO ENCONTRADO');
+          
+          const notificationData = {
+            recipient: post.author,
+            sender: req.userId,
+            type: 'like',  // ⭐ CORREGIDO: 'like' en lugar de 'favorite'
+            title: 'Le gustó tu publicación',
+            message: `A ${liker.name || liker.nombre} le gustó tu publicación`,
+            icon: '❤️',
+            color: 'pink',
+            relatedId: post._id,
+            relatedModel: 'Post',
+            actionUrl: `/post/${post._id}`
+          };
+          
+          console.log('📝 Datos de notificación:', JSON.stringify(notificationData, null, 2));
+          
+          const notification = await Notification.create(notificationData);
+          console.log('🔔 ✅ Notificación creada con ID:', notification._id);
+          
+          // Verificar que se guardó
+          const verificar = await Notification.findById(notification._id);
+          console.log('✅ Verificación en BD:', verificar ? 'GUARDADA' : 'ERROR AL GUARDAR');
+
+          // Emitir por Socket.io
+          const io = req.app.get('io');
+          if (io) {
+            io.to(post.author.toString()).emit('nueva-notificacion', {
+              ...notification.toObject(),
+              sender: {
+                _id: liker._id,
+                name: liker.name || liker.nombre,
+                avatar: liker.avatar
+              }
+            });
+            console.log('📡 Notificación emitida por Socket.io');
+          } else {
+            console.log('⚠️ Socket.io no disponible');
+          }
+        } catch (notifError) {
+          console.error('⚠️ Error creando notificación:', notifError);
+          console.error('   Mensaje:', notifError.message);
+          console.error('   Stack:', notifError.stack);
+        }
+      } else {
+        console.log('ℹ️ Es tu propio post, no se crea notificación');
+      }
     }
 
     await post.save();
+    console.log('💾 Post guardado con', post.stats.likes.length, 'likes');
 
     res.json({
       success: true,
@@ -476,7 +525,6 @@ router.delete('/:postId/like', auth, async (req, res) => {
       });
     }
 
-    // Remover like
     post.stats.likes = post.stats.likes.filter(
       like => like.toString() !== req.userId.toString()
     );
@@ -500,12 +548,12 @@ router.delete('/:postId/like', auth, async (req, res) => {
   }
 });
 
-// ===== 6. AGREGAR COMENTARIO =====
+// 6. AGREGAR COMENTARIO (✅ CON NOTIFICACIONES CORREGIDAS)
 router.post('/:postId/comments', auth, async (req, res) => {
   try {
-    console.log('💬 Agregando comentario al post:', req.params.postId);
+    console.log('💬 ===== AGREGANDO COMENTARIO =====');
+    console.log('📝 Post ID:', req.params.postId);
     console.log('👤 Usuario:', req.userId);
-    console.log('📦 Body:', req.body);
 
     const { content } = req.body;
 
@@ -525,7 +573,6 @@ router.post('/:postId/comments', auth, async (req, res) => {
       });
     }
 
-    // Verificar que el post permita comentarios
     if (post.settings?.allowComments === false) {
       return res.status(403).json({
         success: false,
@@ -533,32 +580,75 @@ router.post('/:postId/comments', auth, async (req, res) => {
       });
     }
 
-    // Crear objeto de comentario
     const newComment = {
       user: req.userId,
       content: content.trim(),
       createdAt: new Date()
     };
 
-    // Si el modelo tiene comments como array, agregar directamente
-    // Si no existe el array, crearlo
     if (!post.comments) {
       post.comments = [];
     }
 
     post.comments.push(newComment);
 
-    // Actualizar contador de comentarios en stats
     if (post.stats) {
       post.stats.commentsCount = post.comments.length;
     }
 
     await post.save();
 
-    // Poblar info del usuario del comentario nuevo
-    // El comentario nuevo es el último del array
+    // ✅ CREAR NOTIFICACIÓN (solo si no eres tú mismo)
+    console.log('🔍 Verificando si crear notificación...');
+    
+    if (post.author.toString() !== req.userId.toString()) {
+      try {
+        const commenter = await User.findById(req.userId);
+        console.log('👤 Comentarista:', commenter ? commenter.name || commenter.nombre : 'NO ENCONTRADO');
+        
+        const notificationData = {
+          recipient: post.author,
+          sender: req.userId,
+          type: 'comment',  // ⭐ CORREGIDO: 'comment' en lugar de 'message'
+          title: 'Nuevo comentario',
+          message: `${commenter.name || commenter.nombre} comentó: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+          icon: '💬',
+          color: 'blue',
+          relatedId: post._id,
+          relatedModel: 'Post',
+          actionUrl: `/post/${post._id}`
+        };
+
+        console.log('📝 Datos de notificación:', JSON.stringify(notificationData, null, 2));
+
+        const notification = await Notification.create(notificationData);
+        console.log('🔔 ✅ Notificación creada con ID:', notification._id);
+
+        // Emitir por Socket.io
+        const io = req.app.get('io');
+        if (io) {
+          io.to(post.author.toString()).emit('nueva-notificacion', {
+            ...notification.toObject(),
+            sender: {
+              _id: commenter._id,
+              name: commenter.name || commenter.nombre,
+              avatar: commenter.avatar
+            }
+          });
+          console.log('📡 Notificación emitida por Socket.io');
+        } else {
+          console.log('⚠️ Socket.io no disponible');
+        }
+      } catch (notifError) {
+        console.error('⚠️ Error creando notificación:', notifError);
+        console.error('   Mensaje:', notifError.message);
+      }
+    } else {
+      console.log('ℹ️ Es tu propio post, no se crea notificación');
+    }
+
     const savedPost = await Post.findById(req.params.postId)
-      .populate('comments.user', 'nombre email avatar');
+      .populate('comments.user', 'name nombre email avatar');
 
     const savedComment = savedPost.comments[savedPost.comments.length - 1];
 
@@ -574,7 +664,6 @@ router.post('/:postId/comments', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error agregando comentario:', error);
-    console.error('   Mensaje:', error.message);
     res.status(500).json({
       success: false,
       message: 'Error al agregar comentario',
@@ -583,13 +672,13 @@ router.post('/:postId/comments', auth, async (req, res) => {
   }
 });
 
-// ===== 6b. OBTENER COMENTARIOS DE UN POST =====
+// 6b. OBTENER COMENTARIOS DE UN POST
 router.get('/:postId/comments', auth, async (req, res) => {
   try {
     console.log('💬 Obteniendo comentarios del post:', req.params.postId);
 
     const post = await Post.findById(req.params.postId)
-      .populate('comments.user', 'nombre email avatar')
+      .populate('comments.user', 'name nombre email avatar')
       .lean();
 
     if (!post) {
@@ -617,10 +706,10 @@ router.get('/:postId/comments', auth, async (req, res) => {
   }
 });
 
-// ===== 6c. ELIMINAR COMENTARIO =====
+// 6c. ELIMINAR COMENTARIO
 router.delete('/:postId/comments/:commentId', auth, async (req, res) => {
   try {
-    console.log('🗑️ Eliminando comentario:', req.params.commentId, 'del post:', req.params.postId);
+    console.log('🗑️ Eliminando comentario:', req.params.commentId);
 
     const post = await Post.findById(req.params.postId);
 
@@ -631,7 +720,6 @@ router.delete('/:postId/comments/:commentId', auth, async (req, res) => {
       });
     }
 
-    // Buscar el comentario
     const commentIndex = post.comments.findIndex(
       c => c._id.toString() === req.params.commentId
     );
@@ -643,7 +731,6 @@ router.delete('/:postId/comments/:commentId', auth, async (req, res) => {
       });
     }
 
-    // Solo el autor del comentario o el autor del post puede eliminarlo
     const isCommentAuthor = post.comments[commentIndex].user.toString() === req.userId.toString();
     const isPostAuthor = post.author.toString() === req.userId.toString();
 
@@ -694,7 +781,6 @@ router.delete('/:postId', auth, async (req, res) => {
       });
     }
 
-    // Verificar que el usuario sea el autor
     if (post.author.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
@@ -702,7 +788,6 @@ router.delete('/:postId', auth, async (req, res) => {
       });
     }
 
-    // Cambiar estado a deleted
     post.status = 'deleted';
     await post.save();
 
@@ -736,7 +821,6 @@ router.put('/:postId', auth, async (req, res) => {
       });
     }
 
-    // Verificar que el usuario sea el autor
     if (post.author.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
@@ -754,9 +838,10 @@ router.put('/:postId', auth, async (req, res) => {
     }
 
     post.content = newContent;
+    post.isEdited = true;
     await post.save();
 
-    await post.populate('author', 'nombre email avatar role');
+    await post.populate('author', 'name nombre email avatar role verified');
 
     console.log('✅ Post editado');
 
@@ -774,16 +859,16 @@ router.put('/:postId', auth, async (req, res) => {
   }
 });
 
-console.log('✅ Rutas de posts configuradas correctamente');
+console.log('✅ Rutas de posts configuradas con notificaciones automáticas');
 console.log('   📝 POST   /api/posts - Crear publicación');
 console.log('   📰 GET    /api/posts - TODAS las publicaciones');
 console.log('   📰 GET    /api/posts/feed - Feed de publicaciones');
 console.log('   👤 GET    /api/posts/user/my-posts - Mis publicaciones');
 console.log('   👥 GET    /api/posts/user/:userId - Posts de usuario');
 console.log('   📄 GET    /api/posts/:postId - Ver publicación');
-console.log('   ❤️  POST   /api/posts/:postId/like - Dar like');
+console.log('   ❤️  POST   /api/posts/:postId/like - Dar like (type: "like")');
 console.log('   💔 DELETE /api/posts/:postId/like - Quitar like');
-console.log('   💬 POST   /api/posts/:postId/comments - Agregar comentario');
+console.log('   💬 POST   /api/posts/:postId/comments - Agregar comentario (type: "comment")');
 console.log('   💬 GET    /api/posts/:postId/comments - Ver comentarios');
 console.log('   💬 DELETE /api/posts/:postId/comments/:commentId - Borrar comentario');
 console.log('   🗑️  DELETE /api/posts/:postId - Eliminar');

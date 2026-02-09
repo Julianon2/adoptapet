@@ -4,7 +4,9 @@ const router = express.Router();
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
 
-// GET /api/notifications - Obtener todas las notificaciones del usuario
+// ============================================
+// GET /api/notifications - Obtener notificaciones
+// ============================================
 router.get('/', protect, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -13,7 +15,7 @@ router.get('/', protect, async (req, res) => {
     const notifications = await Notification.find({ recipient: userId })
       .populate('sender', 'nombre name avatar')
       .sort({ createdAt: -1 })
-      .limit(50); // Últimas 50 notificaciones
+      .limit(50);
 
     const formattedNotifications = notifications.map(notif => {
       const senderName = notif.sender?.nombre || notif.sender?.name || 'Sistema';
@@ -56,7 +58,9 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// GET /api/notifications/unread-count - Obtener contador de no leídas
+// ============================================
+// GET /api/notifications/unread-count - Contador de no leídas
+// ============================================
 router.get('/unread-count', protect, async (req, res) => {
   try {
     const count = await Notification.countDocuments({
@@ -64,6 +68,7 @@ router.get('/unread-count', protect, async (req, res) => {
       read: false
     });
     
+    console.log(`📊 Notificaciones no leídas: ${count}`);
     res.json({ count });
   } catch (error) {
     console.error('❌ Error al contar notificaciones:', error);
@@ -71,7 +76,9 @@ router.get('/unread-count', protect, async (req, res) => {
   }
 });
 
+// ============================================
 // PUT /api/notifications/:id/read - Marcar como leída
+// ============================================
 router.put('/:id/read', protect, async (req, res) => {
   try {
     const notification = await Notification.findOneAndUpdate(
@@ -92,8 +99,10 @@ router.put('/:id/read', protect, async (req, res) => {
   }
 });
 
-// PUT /api/notifications/read-all - Marcar todas como leídas
-router.put('/read-all', protect, async (req, res) => {
+// ============================================
+// PUT /api/notifications/mark-all-read - Marcar todas como leídas
+// ============================================
+router.put('/mark-all-read', protect, async (req, res) => {
   try {
     const result = await Notification.updateMany(
       { recipient: req.user.id, read: false },
@@ -111,7 +120,30 @@ router.put('/read-all', protect, async (req, res) => {
   }
 });
 
+// ============================================
+// DELETE /api/notifications/clear-read - Eliminar solo las leídas
+// ============================================
+router.delete('/clear-read', protect, async (req, res) => {
+  try {
+    const result = await Notification.deleteMany({
+      recipient: req.user.id,
+      read: true
+    });
+
+    console.log(`🗑️ ${result.deletedCount} notificaciones leídas eliminadas`);
+    res.json({ 
+      success: true, 
+      count: result.deletedCount 
+    });
+  } catch (error) {
+    console.error('❌ Error al eliminar leídas:', error);
+    res.status(500).json({ error: 'Error al eliminar notificaciones leídas' });
+  }
+});
+
+// ============================================
 // DELETE /api/notifications/:id - Eliminar una notificación
+// ============================================
 router.delete('/:id', protect, async (req, res) => {
   try {
     const notification = await Notification.findOneAndDelete({
@@ -131,7 +163,9 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// ============================================
 // DELETE /api/notifications - Eliminar todas las notificaciones
+// ============================================
 router.delete('/', protect, async (req, res) => {
   try {
     const result = await Notification.deleteMany({
@@ -150,4 +184,12 @@ router.delete('/', protect, async (req, res) => {
 });
 
 console.log('✅ Rutas de notificaciones cargadas');
+console.log('   📬 GET    /api/notifications - Obtener todas');
+console.log('   📊 GET    /api/notifications/unread-count - Contador');
+console.log('   ✅ PUT    /api/notifications/:id/read - Marcar como leída');
+console.log('   ✅ PUT    /api/notifications/mark-all-read - Marcar todas');
+console.log('   🗑️ DELETE /api/notifications/clear-read - Limpiar leídas');
+console.log('   🗑️ DELETE /api/notifications/:id - Eliminar una');
+console.log('   🗑️ DELETE /api/notifications - Eliminar todas');
+
 module.exports = router;

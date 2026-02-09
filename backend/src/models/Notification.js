@@ -1,4 +1,3 @@
-// backend/src/models/Notification.js
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
@@ -16,10 +15,23 @@ const notificationSchema = new mongoose.Schema({
     ref: 'User'
   },
   
-  // Tipo de notificación
+  // Tipo de notificación - ✅ ACTUALIZADO
   type: {
     type: String,
-    enum: ['adoption', 'favorite', 'message', 'system', 'connection'],
+    enum: [
+      'like',              // ⭐ AGREGADO
+      'comment',           // ⭐ AGREGADO
+      'mention',           // ⭐ AGREGADO
+      'favorite',          
+      'adoption',
+      'adoption_request',  
+      'adoption_accepted', 
+      'adoption_rejected', 
+      'message',
+      'new_post',          
+      'system',
+      'connection'
+    ],
     required: true
   },
   
@@ -44,7 +56,7 @@ const notificationSchema = new mongoose.Schema({
   // Color para la UI
   color: {
     type: String,
-    enum: ['purple', 'green', 'blue', 'yellow', 'pink', 'red'],
+    enum: ['purple', 'green', 'blue', 'yellow', 'pink', 'red', 'gray'],
     default: 'purple'
   },
   
@@ -54,14 +66,14 @@ const notificationSchema = new mongoose.Schema({
     default: false
   },
   
-  // Referencia relacionada (mascota, chat, etc.)
+  // Referencia relacionada (mascota, chat, post, etc.)
   relatedId: {
     type: mongoose.Schema.Types.ObjectId
   },
   
   relatedModel: {
     type: String,
-    enum: ['Pet', 'Chat', 'User', 'Application']
+    enum: ['Pet', 'Chat', 'User', 'Application', 'Post'] // ⭐ AGREGADO 'Post'
   },
   
   // URL de acción (opcional)
@@ -75,9 +87,6 @@ const notificationSchema = new mongoose.Schema({
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ recipient: 1, read: 1 });
 
-console.log('📬 Iniciando creación del modelo Notification...');
-const Notification = mongoose.model('Notification', notificationSchema);
-console.log('✅ Modelo Notification creado exitosamente');
-console.log('📋 Collection en MongoDB: notifications');
+console.log('📬 Modelo Notification actualizado con soporte para likes y comentarios');
 
-module.exports = Notification;
+module.exports = mongoose.model('Notification', notificationSchema);

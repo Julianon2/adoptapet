@@ -1,4 +1,3 @@
-//este archivo es de la pagina adoptar
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -9,6 +8,10 @@ const Sidebar = () => {
     { path: '/', label: 'Inicio', icon: '🏠' },
     { path: '/adoptar', label: 'Adoptar', icon: '🐶' },
     { path: '/publicar', label: 'Publicar', icon: '📝' },
+
+    // ✅ NUEVO
+    { path: '/adoptar/crear', label: 'Crear adopción', icon: '🐾' },
+
     { path: '/amigos', label: 'Amigos', icon: '👥' },
     { path: '/ajustes', label: 'Ajustes', icon: '⚙️' }
   ];

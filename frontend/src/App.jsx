@@ -11,6 +11,9 @@ import Chat from './pages/Chat';
 import Ajustes from './pages/Ajustes';
 import Amigos from './pages/amigos';
 
+// ✅ NUEVO: importa la página de crear adopción
+import CrearAdopcion from './pages/CrearAdopcion';
+
 function App() {
   return (
     <BrowserRouter>
@@ -21,10 +24,14 @@ function App() {
         {/* ✅ Ruta para callback de Google OAuth */}
         <Route path="/Home" element={<Home />} />
         <Route path="/adoptar" element={<Adoptar />} />
+
+        {/* ✅ NUEVA RUTA */}
+        <Route path="/adoptar/crear" element={<CrearAdopcion />} />
+
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
         <Route path="/publicar" element={<Publicar />} />
-        <Route path="/mensajes" element={<Chat />} /> 
+        <Route path="/mensajes" element={<Chat />} />
         <Route path="/ajustes" element={<Ajustes />} />
         <Route path="/amigos" element={<Amigos />} />
       </Routes>

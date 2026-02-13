@@ -12,7 +12,8 @@ import Ajustes from './pages/Ajustes';
 import Amigos from './pages/amigos';
 import Adminpanel from './pages/AdminPanel';
 import CrearAdopcion from './pages/CrearAdopcion';
-import AIAssistant from './pages/AIAssistant'; // ✅ NUEVO
+import AIAssistant from './pages/AIAssistant';
+import FloatingAIChat from './components/common/FloatingAIChat'; // ← AGREGAR ESTO
 
 function App() {
   return (
@@ -31,10 +32,11 @@ function App() {
         <Route path="/ajustes" element={<Ajustes />} />
         <Route path="/amigos" element={<Amigos />} />
         <Route path="/admin" element={<Adminpanel />} />
-        
-        {/* ✅ NUEVA RUTA - ASISTENTE IA */}
         <Route path="/ai-assistant" element={<AIAssistant />} />
       </Routes>
+
+      {/* 🎯 BURBUJA FLOTANTE - Aparece en todas las páginas */}
+      <FloatingAIChat />
     </BrowserRouter>
   );
 }

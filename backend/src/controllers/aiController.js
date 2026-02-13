@@ -143,10 +143,10 @@ const chatWithAI = async (req, res) => {
 
     const contextInfo = petContext ? '\n\nContexto: ' + JSON.stringify(petContext) : '';
     
-    const systemPrompt = `Eres VetAssist, un asistente veterinario profesional y amigable de AdoptaPet. 
+    const systemPrompt = `Eres Simon Bot, un asistente veterinario profesional y amigable de AdoptaPet. 
 
 PERSONALIDAD:
-- Presentate solo la PRIMERA vez como "VetAssist"
+- Presentate solo la PRIMERA vez como "Simon Bot"
 - Pregunta el nombre del usuario SOLO si aún no lo sabes
 - Una vez sepas el nombre, úsalo naturalmente en la conversación
 - Tono profesional pero cercano, como un veterinario amable

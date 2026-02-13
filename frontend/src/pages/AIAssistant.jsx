@@ -9,7 +9,7 @@ export default function AIAssistant() {
     {
       id: 1,
       sender: 'ai',
-      text: 'Hola, soy VetAssist, tu asistente veterinario de AdoptaPet. Estoy aquí para ayudarte con el cuidado de tus mascotas.\n\nPuedo asesorarte sobre nutrición, comportamiento, salud y bienestar de perros y gatos. También puedo analizar fotos de mascotas si las subes.\n\n¿Cómo te llamas y en qué puedo ayudarte hoy?',
+      text: 'Hola, soy Simon BOT, tu asistente veterinario de AdoptaPet. Estoy aquí para ayudarte con el cuidado de tus mascotas.\n\nPuedo asesorarte sobre nutrición, comportamiento, salud y bienestar de perros y gatos. También puedo analizar fotos de mascotas si las subes.\n\n¿Cómo te llamas y en qué puedo ayudarte hoy?',
       timestamp: new Date()
     }
   ]);

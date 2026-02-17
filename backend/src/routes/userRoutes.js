@@ -184,6 +184,79 @@ router.put('/profile', protect, async (req, res) => {
 });
 
 // =====================================================
+// ✅ NOTIFICATION SETTINGS (NUEVO)
+// =====================================================
+
+// GET - Traer los ajustes de notificaciones del usuario autenticado
+// GET /api/users/notification-settings
+router.get('/notification-settings', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('notificationSettings');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    return res.json({
+      success: true,
+      notificationSettings: user.notificationSettings || {}
+    });
+  } catch (error) {
+    console.error('❌ Error al obtener notificationSettings:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al obtener notificationSettings'
+    });
+  }
+});
+
+// PUT - Guardar los ajustes de notificaciones del usuario autenticado
+// PUT /api/users/notification-settings
+router.put('/notification-settings', protect, async (req, res) => {
+  try {
+    // ✅ Validación / whitelist según tu modelo:
+    // notificationSettings: { likes, comments, followers, mentions, messages }
+    const { likes, comments, followers, mentions, messages } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        notificationSettings: {
+          likes: Boolean(likes),
+          comments: Boolean(comments),
+          followers: Boolean(followers),
+          mentions: Boolean(mentions),
+          messages: Boolean(messages)
+        }
+      },
+      { new: true, runValidators: true }
+    ).select('notificationSettings');
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: '✅ Configuración de notificaciones actualizada',
+      notificationSettings: updatedUser.notificationSettings || {}
+    });
+  } catch (error) {
+    console.error('❌ Error al actualizar notificationSettings:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al actualizar notificationSettings'
+    });
+  }
+});
+
+// =====================================================
 // ✅ CUENTA: CAMBIAR CONTRASEÑA (REAL)
 // PATCH /api/users/me/password
 // =====================================================

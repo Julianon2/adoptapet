@@ -5,13 +5,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Clave secreta con fallback
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambialo';
+// ✅ IMPORTANTE: debe coincidir con el secreto usado al firmar tokens en server.js
+const JWT_SECRET = process.env.JWT_SECRET || 'adoptapet_secreto_super_seguro_2025';
 
 // =============================================
 // PROTEGER RUTAS - Verificar JWT Token (Header o Cookie)
 // =============================================
-
 exports.protect = async (req, res, next) => {
   try {
     let token;
@@ -46,7 +45,8 @@ exports.protect = async (req, res, next) => {
     }
 
     // 6. Verificar si el usuario está activo
-    if (user.status !== 'active') {
+    // (si tu app no usa status, coméntalo o asegúrate que sea 'active' en DB)
+    if (user.status && user.status !== 'active') {
       return res.status(401).json({
         success: false,
         message: 'Esta cuenta ha sido desactivada'
@@ -58,9 +58,11 @@ exports.protect = async (req, res, next) => {
 
     // 8. Permitir acceso a la ruta
     next();
-
   } catch (error) {
     console.error('❌ Error en middleware protect:', error.message);
+
+    // 👇 útil para diferenciar casos
+    // JsonWebTokenError / TokenExpiredError
     return res.status(401).json({
       success: false,
       message: 'Token inválido o expirado'
@@ -71,7 +73,6 @@ exports.protect = async (req, res, next) => {
 // =============================================
 // AUTORIZAR ROLES ESPECÍFICOS
 // =============================================
-
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -88,6 +89,7 @@ exports.restrictTo = (...roles) => {
         message: `No tienes permiso para realizar esta acción. Se requiere uno de los siguientes roles: ${roles.join(', ')}.`
       });
     }
+
     next();
   };
 };
@@ -98,7 +100,6 @@ exports.authorize = exports.restrictTo;
 // =============================================
 // VERIFICAR SI ES DUEÑO DEL RECURSO
 // =============================================
-
 exports.isOwner = (resourceUserId) => {
   return (req, res, next) => {
     // Si es admin, puede hacer todo
@@ -121,7 +122,6 @@ exports.isOwner = (resourceUserId) => {
 // =============================================
 // MIDDLEWARE OPCIONAL DE AUTENTICACIÓN
 // =============================================
-
 exports.optionalAuth = async (req, res, next) => {
   try {
     let token;
@@ -133,14 +133,14 @@ exports.optionalAuth = async (req, res, next) => {
     }
 
     if (!token) {
-      return next(); // No hay token, pero no es obligatorio
+      return next();
     }
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(decoded.id);
 
-      if (user && user.status === 'active') {
+      if (user && (!user.status || user.status === 'active')) {
         req.user = user;
       }
     } catch (err) {
@@ -148,9 +148,8 @@ exports.optionalAuth = async (req, res, next) => {
     }
 
     next();
-
   } catch (error) {
     console.error('❌ Error en optionalAuth:', error.message);
-    next(); // No detener la ejecución
+    next();
   }
 };

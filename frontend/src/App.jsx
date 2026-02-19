@@ -6,7 +6,7 @@ import Adoptar from './pages/Adoptar';
 import Perfil from './pages/perfil';
 import Notificaciones from './pages/Notificaciones';
 import Registro from './pages/registro';
-import VerifyEmail from './pages/VerifyEmail'; // ✅ AGREGADO
+import VerifyEmail from './pages/VerifyEmail';
 import Publicar from './pages/publicar';
 import Chat from './pages/Chat';
 import Ajustes from './pages/Ajustes';
@@ -22,9 +22,12 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/verify-email" element={<VerifyEmail />} /> {/* ✅ AGREGADO */}
+        <Route path="/verify-email" element={<VerifyEmail />} />
+
+        {/* ✅ Home acepta ?post=ID para abrir una publicación directamente */}
         <Route path="/" element={<Home />} />
         <Route path="/Home" element={<Home />} />
+
         <Route path="/adoptar" element={<Adoptar />} />
         <Route path="/adoptar/crear" element={<CrearAdopcion />} />
         <Route path="/perfil" element={<Perfil />} />

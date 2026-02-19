@@ -1,6 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, ArrowLeft } from 'lucide-react';
 
+// ===== Convierte URLs en el texto en links clickeables =====
+const renderMessageText = (text) => {
+  if (!text) return null;
+
+  // Regex para detectar URLs http/https
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, i) => {
+    if (urlRegex.test(part)) {
+      // Es una URL — renderizar como link
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline break-all"
+          style={{ color: '#1877f2' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    // Texto normal
+    return <span key={i}>{part}</span>;
+  });
+};
+
 export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef(null);
@@ -27,9 +57,7 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
     }
   };
 
-  // ✅ helper: determinar si un mensaje fue leído
   const isMessageRead = (message) => {
-    // soporta varias formas: status, readAt, read boolean
     if (!message) return false;
     if (message.status === 'read') return true;
     if (message.readAt) return true;
@@ -67,7 +95,7 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
         </div>
       </header>
 
-      {/* Mensajes (scroll aquí) */}
+      {/* Mensajes */}
       <div
         className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-[#efeae2]"
         style={{
@@ -85,7 +113,6 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
                 key={message.id}
                 className={`flex mb-1 ${isMe ? 'justify-end' : 'justify-start'}`}
               >
-                {/* ✅ Bubble */}
                 <div
                   className={`rounded-lg shadow-sm ${isMe ? 'bg-purple-200' : 'bg-white'}`}
                   style={{
@@ -98,8 +125,9 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
                   }}
                 >
                   <div className="flex items-end gap-2">
+                    {/* ✅ Texto con links clickeables */}
                     <p className="text-[14.2px] leading-[19px] whitespace-pre-wrap break-words m-0">
-                      {message.text}
+                      {renderMessageText(message.text)}
                     </p>
 
                     <div className="flex items-center gap-1 shrink-0">
@@ -107,7 +135,6 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
                         {message.time}
                       </span>
 
-                      {/* ✅ Checks con "visto" púrpura */}
                       {isMe && (
                         <svg
                           className={`w-4 h-4 ${read ? 'text-purple-800' : 'text-gray-500'}`}
@@ -131,7 +158,7 @@ export default function ChatWindow({ chat, messages, onSendMessage, onBack }) {
         </div>
       </div>
 
-      {/* Input fijo abajo */}
+      {/* Input */}
       <footer className="bg-[#f0f2f5] px-3 py-2 flex items-end gap-2 flex-shrink-0">
         <div className="flex-1 bg-white rounded-full px-4 py-2 flex items-center min-w-0">
           <input

@@ -69,6 +69,7 @@ console.log('✅ CORS configurado con soporte para uploads');
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,        // ✅ FIX: evita header CORS duplicado "*, *"
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
@@ -490,7 +491,6 @@ try {
   console.error('Error detallado:', error.message);
 }
 
-// ✅✅✅ NUEVO: RUTAS DE SOLICITUDES DE AMISTAD
 try {
   const friendRequestRoutes = require('./src/routes/friendRequestRoutes');
   app.use('/api/friend-requests', friendRequestRoutes);
@@ -543,7 +543,7 @@ try {
 }
 
 // ============================================
-// 🤖 RUTAS DE IA - CRÍTICO
+// 🤖 RUTAS DE IA
 // ============================================
 try {
   console.log('\n🤖 Cargando módulo de IA...');
@@ -604,46 +604,28 @@ app.use((err, req, res, next) => {
   }
   
   if (err.name === 'CastError') {
-    return res.status(400).json({
-      success: false,
-      message: 'ID inválido'
-    });
+    return res.status(400).json({ success: false, message: 'ID inválido' });
   }
   
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern)[0];
-    return res.status(400).json({
-      success: false,
-      message: `El ${field} ya está registrado`
-    });
+    return res.status(400).json({ success: false, message: `El ${field} ya está registrado` });
   }
   
   if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
-      success: false,
-      message: 'Token inválido'
-    });
+    return res.status(401).json({ success: false, message: 'Token inválido' });
   }
   
   if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      success: false,
-      message: 'Token expirado'
-    });
+    return res.status(401).json({ success: false, message: 'Token expirado' });
   }
   
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({
-      success: false,
-      message: 'El archivo es demasiado grande. Máximo 5MB.'
-    });
+    return res.status(400).json({ success: false, message: 'El archivo es demasiado grande. Máximo 5MB.' });
   }
   
   if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    return res.status(400).json({
-      success: false,
-      message: 'Campo de archivo inesperado'
-    });
+    return res.status(400).json({ success: false, message: 'Campo de archivo inesperado' });
   }
   
   const statusCode = err.statusCode || err.status || 500;
@@ -678,8 +660,6 @@ server.listen(PORT, HOST, () => {
   console.log(`   • Groq API Key: ${process.env.GROQ_API_KEY ? '✅ Configurada' : '❌ NO configurada'}`);
   console.log(`   • Modelo: llama-3.3-70b-versatile`);
   console.log(`   • Endpoint Chat: http://localhost:${PORT}/api/ai/chat`);
-  
-  
 });
 
 // ============================================
@@ -692,9 +672,7 @@ const gracefulShutdown = (signal) => {
     logger.log.success('Servidor HTTP cerrado');
     
     if (services.socketLoaded && io) {
-      io.close(() => {
-        logger.log.success('Socket.io cerrado');
-      });
+      io.close(() => { logger.log.success('Socket.io cerrado'); });
     }
     
     if (services.mongoConnected) {

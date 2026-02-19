@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { friendRequestService } from '../services/friendRequestService';
 
+// ✅ URL base unificada — antes estaba mezclado 127.0.0.1 y localhost
+const API = 'http://localhost:5000';
+
 function Perfil() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +30,6 @@ function Perfil() {
   const [favoritePosts, setFavoritePosts] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
 
-  // ✅ Estados para solicitudes de amistad
   const [friendRequests, setFriendRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
 
@@ -53,7 +55,7 @@ function Perfil() {
       return;
     }
     try {
-      const response = await fetch('http://127.0.0.1:5000/profile', {
+      const response = await fetch(`${API}/profile`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -72,7 +74,7 @@ function Perfil() {
       const data = await response.json();
       const userData = data.user || data;
       if (userData.avatar && !userData.avatar.startsWith('http')) {
-        userData.avatar = `http://127.0.0.1:5000${userData.avatar}`;
+        userData.avatar = `${API}${userData.avatar}`;
       }
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -84,7 +86,7 @@ function Perfil() {
         try {
           const userData = JSON.parse(storedUser);
           if (userData.avatar && !userData.avatar.startsWith('http')) {
-            userData.avatar = `http://127.0.0.1:5000${userData.avatar}`;
+            userData.avatar = `${API}${userData.avatar}`;
           }
           setUser(userData);
           setError('');
@@ -101,7 +103,7 @@ function Perfil() {
     setPostsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://127.0.0.1:5000/api/posts/user/my-posts', {
+      const response = await axios.get(`${API}/api/posts/user/my-posts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success && response.data.data) {
@@ -125,7 +127,7 @@ function Perfil() {
     setApplicationsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://127.0.0.1:5000/api/applications', {
+      const response = await axios.get(`${API}/api/applications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success && response.data.data) {
@@ -145,7 +147,7 @@ function Perfil() {
     setFavoritesLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://127.0.0.1:5000/api/favoritos', {
+      const response = await axios.get(`${API}/api/favoritos`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
@@ -161,7 +163,6 @@ function Perfil() {
     }
   };
 
-  // ✅ Cargar solicitudes de amistad
   const cargarSolicitudesAmistad = async () => {
     setRequestsLoading(true);
     try {
@@ -175,7 +176,6 @@ function Perfil() {
     }
   };
 
-  // ✅ Aceptar solicitud de amistad
   const handleAcceptRequest = async (requestId) => {
     try {
       await friendRequestService.acceptRequest(requestId);
@@ -187,7 +187,6 @@ function Perfil() {
     }
   };
 
-  // ✅ Rechazar solicitud de amistad
   const handleRejectRequest = async (requestId) => {
     try {
       await friendRequestService.rejectRequest(requestId);
@@ -203,7 +202,7 @@ function Perfil() {
     if (!window.confirm('¿Estás seguro de eliminar esta publicación?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://127.0.0.1:5000/api/posts/${postId}`, {
+      await axios.delete(`${API}/api/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPosts(prev => prev.filter(post => post._id !== postId));
@@ -218,7 +217,7 @@ function Perfil() {
   const handleApplicationAction = async (applicationId, action) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://127.0.0.1:5000/api/applications/${applicationId}`, 
+      await axios.put(`${API}/api/applications/${applicationId}`, 
         { status: action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -258,14 +257,14 @@ function Perfil() {
       }
       const formData = new FormData();
       formData.append('avatar', file);
-      const response = await fetch('http://127.0.0.1:5000/api/users/avatar', {
+      const response = await fetch(`${API}/api/users/avatar`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        const avatarUrl = data.avatar.startsWith('http') ? data.avatar : `http://127.0.0.1:5000${data.avatar}`;
+        const avatarUrl = data.avatar.startsWith('http') ? data.avatar : `${API}${data.avatar}`;
         const updatedUser = { ...user, avatar: avatarUrl };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -309,7 +308,7 @@ function Perfil() {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://127.0.0.1:5000/api/users/profile', {
+      const response = await fetch(`${API}/api/users/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -326,7 +325,7 @@ function Perfil() {
       if (response.ok && data.success) {
         const updatedUser = data.user;
         if (updatedUser.avatar && !updatedUser.avatar.startsWith('http')) {
-          updatedUser.avatar = `http://127.0.0.1:5000${updatedUser.avatar}`;
+          updatedUser.avatar = `${API}${updatedUser.avatar}`;
         }
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -372,6 +371,10 @@ function Perfil() {
     return types[type] || '📝 Publicación';
   };
 
+  // ✅ Función helper para avatar con fallback seguro (evita loop infinito)
+  const getAvatarFallback = (name) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=random`;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -400,7 +403,7 @@ function Perfil() {
   const userName = user.nombre || user.name || 'Usuario';
   const userEmail = user.email || 'email@ejemplo.com';
   const userBio = user.bio || 'Amante de los animales 🐾';
-  const avatarUrl = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=200&background=random`;
+  const avatarUrl = user.avatar || getAvatarFallback(userName);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -415,12 +418,24 @@ function Perfil() {
           </div>
         </nav>
       </header>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 rounded-3xl shadow-xl overflow-hidden mb-8">
           <div className="relative px-6 py-12">
             <div className="flex flex-col sm:flex-row items-center sm:items-end">
               <div className="relative group">
-                <img key={avatarUrl} src={avatarUrl} alt="Foto de perfil" className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg object-cover" onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=200&background=random`; }} crossOrigin="anonymous" />
+                {/* ✅ FIX: e.target.onerror = null evita el loop infinito */}
+                <img
+                  key={avatarUrl}
+                  src={avatarUrl}
+                  alt="Foto de perfil"
+                  className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null; // ← CRÍTICO: corta el loop
+                    e.target.src = getAvatarFallback(userName);
+                  }}
+                  crossOrigin="anonymous"
+                />
                 <div onClick={handleAvatarClick} className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                   <div className="text-white text-center">
                     <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,6 +456,7 @@ function Perfil() {
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
           <div className="flex border-b border-gray-200 overflow-x-auto">
             <button onClick={() => setActiveTab('publicaciones')} className={`flex-1 px-6 py-4 text-sm font-semibold border-b-2 transition-colors duration-300 whitespace-nowrap ${activeTab === 'publicaciones' ? 'border-purple-600 bg-purple-50 text-gray-700' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>📱 Publicaciones</button>
@@ -452,14 +468,12 @@ function Perfil() {
             </button>
             <button onClick={() => setActiveTab('historial')} className={`flex-1 px-6 py-4 text-sm font-semibold border-b-2 transition-colors duration-300 whitespace-nowrap ${activeTab === 'historial' ? 'border-purple-600 bg-purple-50 text-gray-700' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>⭐ Favoritos</button>
           </div>
+
           <div className="p-6">
             {activeTab === 'publicaciones' && (
               <div>
                 {postsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-4">🔄</div>
-                    <p className="text-gray-600">Cargando publicaciones...</p>
-                  </div>
+                  <div className="text-center py-8"><div className="text-4xl mb-4">🔄</div><p className="text-gray-600">Cargando publicaciones...</p></div>
                 ) : posts.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">📭</div>
@@ -473,17 +487,39 @@ function Perfil() {
                       <div key={post._id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
                         <div className="p-4 flex items-center justify-between border-b">
                           <div className="flex items-center gap-3">
-                            <img src={post.author?.avatar || avatarUrl} alt={post.author?.name || userName} className="w-10 h-10 rounded-full object-cover" />
+                            {/* ✅ FIX: onerror = null en posts también */}
+                            <img
+                              src={post.author?.avatar || avatarUrl}
+                              alt={post.author?.nombre || post.author?.name || userName}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => { e.target.onerror = null; e.target.src = getAvatarFallback(userName); }}
+                            />
                             <div>
-                              <p className="font-semibold">{post.author?.name || userName}</p>
+                              <p className="font-semibold">{post.author?.nombre || post.author?.name || userName}</p>
                               <p className="text-xs text-gray-500">{formatTimeAgo(post.createdAt)}</p>
                             </div>
                           </div>
                           <button onClick={() => handleDeletePost(post._id)} className="text-gray-400 hover:text-red-500 transition" title="Eliminar publicación">🗑️</button>
                         </div>
-                        {post.images && post.images.length > 0 && (
+                        {post.media?.images && post.media.images.length > 0 && (
                           <div className="w-full">
-                            <img src={`http://127.0.0.1:5000${post.images[0].url || post.images[0]}`} alt="Publicación" className="w-full h-auto max-h-96 object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            <img
+                              src={`${API}${post.media.images[0]}`}
+                              alt="Publicación"
+                              className="w-full h-auto max-h-96 object-cover"
+                              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        {/* Soporte para campo images legacy */}
+                        {!post.media?.images && post.images && post.images.length > 0 && (
+                          <div className="w-full">
+                            <img
+                              src={`${API}${post.images[0].url || post.images[0]}`}
+                              alt="Publicación"
+                              className="w-full h-auto max-h-96 object-cover"
+                              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+                            />
                           </div>
                         )}
                         <div className="p-4">
@@ -492,7 +528,7 @@ function Perfil() {
                           <span className="inline-block mt-3 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">{getTypeText(post.type)}</span>
                         </div>
                         <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between text-sm">
-                          <span className="text-gray-600">❤️ {post.stats?.likesCount || 0} Me gusta</span>
+                          <span className="text-gray-600">❤️ {post.stats?.likes?.length || post.stats?.likesCount || 0} Me gusta</span>
                           <span className="text-gray-600">💬 {post.stats?.commentsCount || 0} Comentarios</span>
                         </div>
                       </div>
@@ -502,58 +538,37 @@ function Perfil() {
               </div>
             )}
 
-            {/* ✅ PESTAÑA SOLICITUDES: Adopción + Amistad */}
             {activeTab === 'solicitudes' && (
               <div className="space-y-8">
                 {/* Solicitudes de AMISTAD */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">
-                      {friendRequests.length}
-                    </span>
+                    <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">{friendRequests.length}</span>
                     👥 Solicitudes de Amistad
                   </h3>
-                  
                   {requestsLoading ? (
-                    <div className="text-center py-8">
-                      <div className="text-4xl mb-4">🔄</div>
-                      <p className="text-gray-600">Cargando solicitudes de amistad...</p>
-                    </div>
+                    <div className="text-center py-8"><div className="text-4xl mb-4">🔄</div><p className="text-gray-600">Cargando solicitudes de amistad...</p></div>
                   ) : friendRequests.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-2xl">
-                      <div className="text-4xl mb-2">📭</div>
-                      <p className="text-gray-600">No tienes solicitudes de amistad pendientes</p>
-                    </div>
+                    <div className="text-center py-8 bg-gray-50 rounded-2xl"><div className="text-4xl mb-2">📭</div><p className="text-gray-600">No tienes solicitudes de amistad pendientes</p></div>
                   ) : (
                     <div className="space-y-3">
                       {friendRequests.map(request => (
                         <div key={request._id} className="bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4">
                           <img
-                            src={request.from?.avatar || `https://ui-avatars.com/api/?name=${request.from?.name || request.from?.nombre}&size=80`}
-                            alt={request.from?.name || request.from?.nombre}
+                            src={request.from?.avatar || getAvatarFallback(request.from?.nombre || request.from?.name)}
+                            alt={request.from?.nombre || request.from?.name}
                             className="w-16 h-16 rounded-full object-cover border-2 border-purple-200"
+                            onError={(e) => { e.target.onerror = null; e.target.src = getAvatarFallback(request.from?.nombre || request.from?.name); }}
                           />
                           <div className="flex-1">
-                            <h4 className="font-bold text-gray-800">{request.from?.name || request.from?.nombre}</h4>
+                            <h4 className="font-bold text-gray-800">{request.from?.nombre || request.from?.name}</h4>
                             <p className="text-sm text-gray-500">{request.from?.email}</p>
-                            {request.message && (
-                              <p className="text-sm text-gray-600 mt-1 italic">"{request.message}"</p>
-                            )}
+                            {request.message && (<p className="text-sm text-gray-600 mt-1 italic">"{request.message}"</p>)}
                             <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(request.createdAt)}</p>
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => handleAcceptRequest(request._id)}
-                              className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
-                            >
-                              ✓ Aceptar
-                            </button>
-                            <button
-                              onClick={() => handleRejectRequest(request._id)}
-                              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition"
-                            >
-                              ✕ Rechazar
-                            </button>
+                            <button onClick={() => handleAcceptRequest(request._id)} className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">✓ Aceptar</button>
+                            <button onClick={() => handleRejectRequest(request._id)} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition">✕ Rechazar</button>
                           </div>
                         </div>
                       ))}
@@ -564,29 +579,25 @@ function Perfil() {
                 {/* Solicitudes de ADOPCIÓN */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
-                      {applications.length}
-                    </span>
+                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{applications.length}</span>
                     🏠 Solicitudes de Adopción
                   </h3>
-
                   {applicationsLoading ? (
-                    <div className="text-center py-8">
-                      <div className="text-4xl mb-4">🔄</div>
-                      <p className="text-gray-600">Cargando solicitudes de adopción...</p>
-                    </div>
+                    <div className="text-center py-8"><div className="text-4xl mb-4">🔄</div><p className="text-gray-600">Cargando solicitudes de adopción...</p></div>
                   ) : applications.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-2xl">
-                      <div className="text-4xl mb-2">📭</div>
-                      <p className="text-gray-600">No tienes solicitudes de adopción pendientes</p>
-                    </div>
+                    <div className="text-center py-8 bg-gray-50 rounded-2xl"><div className="text-4xl mb-2">📭</div><p className="text-gray-600">No tienes solicitudes de adopción pendientes</p></div>
                   ) : (
                     <div className="space-y-3">
                       {applications.map(app => (
                         <div key={app._id} className="bg-gray-50 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                          <img src={app.user?.avatar || `https://ui-avatars.com/api/?name=${app.user?.name}&size=80`} alt={app.user?.name} className="w-16 h-16 rounded-full border-2 border-blue-300" />
+                          <img
+                            src={app.user?.avatar || getAvatarFallback(app.user?.nombre || app.user?.name)}
+                            alt={app.user?.nombre || app.user?.name}
+                            className="w-16 h-16 rounded-full border-2 border-blue-300"
+                            onError={(e) => { e.target.onerror = null; e.target.src = getAvatarFallback(app.user?.nombre || app.user?.name); }}
+                          />
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-800">{app.user?.name}</h3>
+                            <h3 className="text-lg font-bold text-gray-800">{app.user?.nombre || app.user?.name}</h3>
                             <p className="text-gray-600 text-sm">Interesado en <span className="font-semibold">{app.pet?.name}</span></p>
                             <p className="text-gray-500 text-xs mt-1">{formatTimeAgo(app.createdAt)}</p>
                           </div>
@@ -605,10 +616,7 @@ function Perfil() {
             {activeTab === 'historial' && (
               <div>
                 {favoritesLoading ? (
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-4">🔄</div>
-                    <p className="text-gray-600">Cargando favoritos...</p>
-                  </div>
+                  <div className="text-center py-8"><div className="text-4xl mb-4">🔄</div><p className="text-gray-600">Cargando favoritos...</p></div>
                 ) : favoritePosts.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">⭐</div>
@@ -621,16 +629,26 @@ function Perfil() {
                       <div key={post._id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
                         <div className="p-4 flex items-center justify-between border-b">
                           <div className="flex items-center gap-3">
-                            <img src={post.author?.avatar || avatarUrl} alt={post.author?.name || userName} className="w-10 h-10 rounded-full object-cover" />
+                            <img
+                              src={post.author?.avatar || avatarUrl}
+                              alt={post.author?.nombre || post.author?.name || userName}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => { e.target.onerror = null; e.target.src = getAvatarFallback(userName); }}
+                            />
                             <div>
-                              <p className="font-semibold">{post.author?.name || userName}</p>
+                              <p className="font-semibold">{post.author?.nombre || post.author?.name || userName}</p>
                               <p className="text-xs text-gray-500">{formatTimeAgo(post.createdAt)}</p>
                             </div>
                           </div>
                         </div>
                         {post.media?.images && post.media.images.length > 0 && (
                           <div className="w-full">
-                            <img src={`http://127.0.0.1:5000${post.media.images[0]}`} alt="Post" className="w-full h-auto max-h-96 object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            <img
+                              src={`${API}${post.media.images[0]}`}
+                              alt="Post"
+                              className="w-full h-auto max-h-96 object-cover"
+                              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+                            />
                           </div>
                         )}
                         <div className="p-4">
@@ -645,9 +663,11 @@ function Perfil() {
           </div>
         </div>
       </main>
+
       <footer className="bg-gray-800 text-white py-8 text-center mt-12">
         <p>&copy; 2025 AdoptaPet. Todos los derechos reservados. Hecho con ❤️ para las mascotas.</p>
       </footer>
+
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -658,7 +678,15 @@ function Perfil() {
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <div className="relative inline-block group">
-                  <img key={avatarUrl} src={avatarUrl} alt="Foto de perfil" className="w-32 h-32 rounded-full border-4 border-purple-300 object-cover mx-auto" crossOrigin="anonymous" onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=200&background=random`; }} />
+                  {/* ✅ FIX: onerror = null en modal también */}
+                  <img
+                    key={avatarUrl}
+                    src={avatarUrl}
+                    alt="Foto de perfil"
+                    className="w-32 h-32 rounded-full border-4 border-purple-300 object-cover mx-auto"
+                    crossOrigin="anonymous"
+                    onError={(e) => { e.target.onerror = null; e.target.src = getAvatarFallback(userName); }}
+                  />
                   <div onClick={handleAvatarClick} className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <div className="text-white text-center">
                       <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,6 +729,7 @@ function Perfil() {
           </div>
         </div>
       )}
+
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">{notification}</div>
       )}

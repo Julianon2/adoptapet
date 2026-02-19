@@ -4,7 +4,6 @@ import { Heart, MessageCircle, Share2, MoreVertical, Trash2, Edit2, Star } from 
 // ===== AVATAR FALLBACK LOCAL (sin peticiones externas) =====
 const generateAvatarSVG = (name = 'U') => {
     const initials = name.trim().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-    // Colores basados en el nombre para que sea consistente
     const colors = ['#4F46E5','#7C3AED','#EC4899','#F59E0B','#10B981','#3B82F6','#EF4444','#8B5CF6'];
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -19,12 +18,6 @@ const generateAvatarSVG = (name = 'U') => {
 };
 
 const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) => {
-    // ===== DEBUGGING TEMPORAL =====
-    console.log('🔍 PostCard - Post completo:', post);
-    console.log('👤 PostCard - Post author:', post.author);
-    console.log('📝 author.name:', post.author?.name);
-    console.log('📝 author.nombre:', post.author?.nombre);
-    
     // ===== VALIDACIÓN =====
     if (!post) {
         console.error('PostCard: post es null o undefined');
@@ -35,6 +28,14 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
         console.error('PostCard: currentUser es null o undefined');
         return null;
     }
+
+    // ===== FALLBACK PARA AUTHOR NULL (posts huérfanos) =====
+    const author = post.author || {
+        nombre: 'Usuario eliminado',
+        name: 'Usuario eliminado',
+        avatar: null,
+        verified: { email: false }
+    };
 
     // ===== ESTADO =====
     const [isFavorite, setIsFavorite] = useState(false);
@@ -57,7 +58,6 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
             return `http://127.0.0.1:5000${user.avatar}`;
         }
 
-        // Fallback local, sin petición externa
         const name = user.name || user.nombre || 'User';
         return generateAvatarSVG(name);
     };
@@ -173,9 +173,10 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
     };
 
     // ===== VERIFICAR PROPIETARIO =====
-    const authorId = post.author?._id || post.author;
+    // Si author es null (post huérfano), nadie es el dueño
+    const authorId = post.author?._id || null;
     const currentUserId = currentUser._id || currentUser.id || currentUser;
-    const isOwner = String(authorId) === String(currentUserId);
+    const isOwner = authorId !== null && String(authorId) === String(currentUserId);
 
     // ===== HANDLERS =====
     const handleFavorite = async () => {
@@ -306,21 +307,21 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
             <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <img
-                        src={getAvatarUrl(post.author)}
-                        alt={post.author?.nombre || post.author?.name || 'Usuario'}
+                        src={getAvatarUrl(author)}
+                        alt={author.nombre || author.name || 'Usuario'}
                         className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
                         onError={(e) => {
                             e.target.onError = null;
-                            const name = post.author?.nombre || post.author?.name || 'U';
+                            const name = author.nombre || author.name || 'U';
                             e.target.src = generateAvatarSVG(name);
                         }}
                     />
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-gray-900">
-                                {post.author?.nombre || post.author?.name || 'Usuario'}
+                                {author.nombre || author.name || 'Usuario eliminado'}
                             </h3>
-                            {post.author?.verified?.email && (
+                            {author.verified?.email && (
                                 <span className="text-blue-500 text-sm">✓</span>
                             )}
                             <span className="text-xs">
@@ -334,7 +335,7 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
                     </div>
                 </div>
 
-                {/* Menú de 3 puntos - SIEMPRE visible */}
+                {/* Menú de 3 puntos */}
                 <div className="relative">
                     <button
                         onClick={() => setShowMenu(!showMenu)}

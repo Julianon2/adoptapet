@@ -22,7 +22,7 @@ export default function Registro() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  
+
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -87,7 +87,7 @@ export default function Registro() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'telefono') {
       const numericValue = value.replace(/\D/g, '').slice(0, 10);
       setFormData({ ...formData, [name]: numericValue });
@@ -149,14 +149,16 @@ export default function Registro() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setMessage({ text: `Registro exitoso! Bienvenido ${nombre}`, type: 'success' });
-        
-        if (data.token) localStorage.setItem('token', data.token);
-        if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
-        
+        setMessage({
+          text: `✅ Registro exitoso. Redirigiendo para verificar tu correo...`,
+          type: 'success'
+        });
+
+        // ✅ CORREGIDO: Redirigir a verificación de email en lugar del home
         setTimeout(() => {
-          navigate('/');
+          navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`);
         }, 1500);
+
       } else {
         setMessage({ text: data.message || 'Error en el Registro', type: 'error' });
       }
@@ -168,53 +170,49 @@ export default function Registro() {
     }
   };
 
-  // ✅ NUEVA FUNCIÓN PARA GOOGLE LOGIN CON DEBUGGING
+  // Google Login
   const handleGoogleLogin = async (e) => {
     e.preventDefault();
-    
+
     console.log('🔍 Iniciando Google Login...');
-    console.log('URL destino:', 'http://localhost:5000/auth/google');
-    
+
     try {
-      // Verificar que el backend esté activo
       const response = await fetch('http://localhost:5000/health');
       const data = await response.json();
-      
+
       console.log('✅ Backend activo:', data);
-      console.log('✅ Google Auth:', data.services?.googleAuth);
-      
+
       if (data.services?.googleAuth === 'disabled') {
-        setMessage({ 
-          text: 'Google OAuth no está disponible. Verifica la configuración del servidor.', 
-          type: 'error' 
+        setMessage({
+          text: 'Google OAuth no está disponible. Verifica la configuración del servidor.',
+          type: 'error'
         });
         return;
       }
-      
-      // Todo bien, redirigir a Google
+
       console.log('🔄 Redirigiendo a Google OAuth...');
       window.location.href = 'http://localhost:5000/auth/google';
-      
+
     } catch (err) {
       console.error('❌ Error al verificar backend:', err);
-      setMessage({ 
-        text: 'No se puede conectar con el servidor. Verifica que esté corriendo en el puerto 5000.', 
-        type: 'error' 
+      setMessage({
+        text: 'No se puede conectar con el servidor. Verifica que esté corriendo en el puerto 5000.',
+        type: 'error'
       });
     }
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-5 bg-cover bg-center bg-fixed relative"
       style={{ backgroundImage: "url('https://www.petdarling.com/wp-content/uploads/2021/04/animales-domesticos-1.jpg')" }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
       <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-10 max-w-md w-full">
-        
+
         <div className="text-6xl mb-3 text-center">🐾</div>
-        
+
         <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Unete a AdoptaPet</h1>
         <p className="text-gray-600 text-sm mb-8 text-center">Dale un hogar a tu nuevo mejor amigo</p>
 
@@ -227,7 +225,7 @@ export default function Registro() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          
+
           <div className="text-left">
             <label htmlFor="nombre" className="block text-gray-700 font-medium mb-2 text-sm">
               Nombre completo
@@ -358,8 +356,7 @@ export default function Registro() {
           Ya tienes cuenta? <Link to="/login" className="text-purple-600 font-semibold hover:underline">Inicia sesion</Link>
         </div>
 
-        {/* ✅ BOTÓN DE GOOGLE CORREGIDO - Ahora es un button con onClick */}
-        <button 
+        <button
           onClick={handleGoogleLogin}
           type="button"
           className="flex items-center justify-center w-full py-3.5 px-5 bg-white border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-blue-500 hover:shadow-lg transition-all mb-5 mt-5"

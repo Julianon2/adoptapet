@@ -32,6 +32,20 @@ router.post('/registro', registroValidation, authController.registro);
 router.post('/login', loginValidation, authController.login);
 
 /**
+ * @route   POST /api/auth/verify-email
+ * @desc    Verificar código de email
+ * @access  Public
+ */
+router.post('/verify-email', authController.verifyEmail);
+
+/**
+ * @route   POST /api/auth/resend-verification
+ * @desc    Reenviar código de verificación
+ * @access  Public
+ */
+router.post('/resend-verification', authController.resendVerification);
+
+/**
  * @route   GET /api/auth/test
  * @desc    Verificar que las rutas están montadas correctamente
  * @access  Public

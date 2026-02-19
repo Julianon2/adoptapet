@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 
 function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' o 'error'
+  const [messageType, setMessageType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const LOGIN_API_URL = 'http://localhost:5000/api';
@@ -18,32 +19,31 @@ function Login() {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (localStorage.getItem('token')) {
-      console.log('✅ Usuario ya autenticado, redirigiendo...');
       navigate('/');
     }
   }, [navigate]);
 
+  // Mostrar mensaje si viene de verificación exitosa
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      setMessage('✅ Email verificado correctamente. Ahora puedes iniciar sesión.');
+      setMessageType('success');
+    }
+  }, [searchParams]);
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('📤 Enviando login:', formData.email);
-
     setIsLoading(true);
     setMessage('');
 
     try {
       const response = await fetch(`${LOGIN_API_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email.trim(),
           password: formData.password
@@ -54,34 +54,32 @@ function Login() {
       console.log('📥 Respuesta del servidor:', data);
 
       if (response.ok && data.success) {
-        // Guardar token y usuario en localStorage
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          console.log('✅ Token guardado');
-        }
-        
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          console.log('✅ Usuario guardado');
-        }
-        
-        // Mostrar mensaje de éxito
-        setMessage(`✅ ${data.message || 'Login exitoso'}`);
+        if (data.token) localStorage.setItem('token', data.token);
+        if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+        setMessage('✅ Login exitoso. Redirigiendo...');
         setMessageType('success');
-        
-        // Redirigir después de 1.5 segundos
+
+        setTimeout(() => navigate('/'), 1500);
+
+      } else if (data.requiresVerification) {
+        // ✅ CASO CLAVE: email no verificado → redirigir a verificación
+        setMessage('📧 Debes verificar tu email antes de entrar. Redirigiendo...');
+        setMessageType('error');
+
         setTimeout(() => {
-          navigate('/');
-        }, 1500);
+          navigate(`/verify-email?email=${encodeURIComponent(formData.email.trim())}`);
+        }, 2000);
+
       } else {
-        // Mostrar error
-        setMessage('❌ ' + (data.message || 'Error en el login'));
+        setMessage('❌ ' + (data.message || 'Email o contraseña incorrectos'));
         setMessageType('error');
         setIsLoading(false);
       }
+
     } catch (error) {
       console.error('❌ Error en login:', error);
-      setMessage('❌ Error al conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5000.');
+      setMessage('❌ Error al conectar con el servidor.');
       setMessageType('error');
       setIsLoading(false);
     }
@@ -93,13 +91,11 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center h-screen relative overflow-hidden">
-      
+
       {/* Fondo con blur */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center filter blur-sm"
-        style={{
-          backgroundImage: "url('https://www.petdarling.com/wp-content/uploads/2021/04/animales-domesticos-1.jpg')"
-        }}
+        style={{ backgroundImage: "url('https://www.petdarling.com/wp-content/uploads/2021/04/animales-domesticos-1.jpg')" }}
       />
 
       {/* Overlay oscuro */}
@@ -107,22 +103,19 @@ function Login() {
 
       {/* Contenedor principal */}
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96 relative z-10">
-        
-        {/* Título */}
+
         <h1 className="text-2xl font-bold text-center text-blue-600 mb-6">
           Iniciar Sesión en Adoptapet
         </h1>
-        
-        {/* Formulario de login */}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* Correo */}
+
           <div>
             <label htmlFor="email" className="block text-gray-700">Correo</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
+            <input
+              type="email"
+              id="email"
+              name="email"
               required
               value={formData.email}
               onChange={handleChange}
@@ -131,14 +124,13 @@ function Login() {
             />
           </div>
 
-          {/* Contraseña con ojito */}
           <div>
             <label htmlFor="password" className="block text-gray-700">Contraseña</label>
             <div className="relative">
-              <input 
+              <input
                 type={showPassword ? 'text' : 'password'}
-                id="password" 
-                name="password" 
+                id="password"
+                name="password"
                 required
                 value={formData.password}
                 onChange={handleChange}
@@ -155,8 +147,7 @@ function Login() {
             </div>
           </div>
 
-          {/* Botón login */}
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
             className="w-full bg-blue-400 text-white py-2 rounded-lg hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
@@ -165,7 +156,7 @@ function Login() {
           </button>
         </form>
 
-        {/* Mensajes de error o éxito */}
+        {/* Mensajes */}
         {message && (
           <p className={`text-center mt-4 text-sm ${
             messageType === 'success' ? 'text-green-600' : 'text-red-500'
@@ -173,8 +164,8 @@ function Login() {
             {message}
           </p>
         )}
-        
-        {/* Botón de Google */}
+
+        {/* Google */}
         <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 hover:border-blue-500 transition-all duration-300 font-semibold mt-4"
@@ -188,7 +179,6 @@ function Login() {
           Continuar con Google
         </button>
 
-        {/* Redirección a Registro */}
         <p className="text-center mt-2 text-sm">
           ¿No tienes cuenta?{' '}
           <Link to="/registro" className="text-blue-600 font-semibold hover:underline">

@@ -1,42 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const NotificacionesModal = ({ isOpen, onClose }) => {
-  const [notificaciones, setNotificaciones] = useState({
-    likes: true,
-    comentarios: true,
-    nuevosSeguidores: true,
-    menciones: true,
-    mensajes: true,
-    email: false,
-    push: true
-  });
+// ============================================================
+// CONSTANTS
+// ============================================================
+const DEFAULT_NOTIFICATIONS = {
+  likes: true,
+  comments: true,
+  followers: true,
+  mentions: true,
+  messages: true,
+};
 
+const NOTIFICATION_SECTIONS = [
+  {
+    title: 'Actividad',
+    items: [
+      { key: 'likes', label: 'Likes en mis publicaciones' },
+      { key: 'comments', label: 'Comentarios' },
+      { key: 'followers', label: 'Nuevos seguidores' },
+      { key: 'mentions', label: 'Menciones' },
+    ]
+  },
+  {
+    title: 'Mensajes',
+    items: [
+      { key: 'messages', label: 'Nuevos mensajes' },
+    ]
+  },
+];
+
+// ============================================================
+// COMPONENT - MAIN
+// ============================================================
+const NotificacionesModal = ({
+  isOpen,
+  onClose,
+  notificationSettings,
+  setNotificationSettings,
+  onSave
+}) => {
+  // Hooks SIEMPRE arriba (no condicionales)
   const [loading, setLoading] = useState(false);
 
+  // Si llega vacío, ponemos defaults UNA vez
+  useEffect(() => {
+    if (!notificationSettings) {
+      setNotificationSettings(DEFAULT_NOTIFICATIONS);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notificationSettings]);
+
+  // ✅ Ahora sí: early return DESPUÉS de hooks
   if (!isOpen) return null;
 
+  const current = notificationSettings || DEFAULT_NOTIFICATIONS;
+
   const toggleNotificacion = (key) => {
-    setNotificaciones(prev => ({
-      ...prev,
-      [key]: !prev[key]
+    setNotificationSettings(prev => ({
+      ...(prev || DEFAULT_NOTIFICATIONS),
+      [key]: !(prev?.[key])
     }));
   };
 
   const handleGuardar = async () => {
     setLoading(true);
-    
     try {
-      // Aquí conecta con tu API
-      // const response = await fetch('/api/notifications/settings', {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(notificaciones)
-      // });
-      
-      // Simulación de guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('✅ Configuración de notificaciones guardada');
+      if (typeof onSave === 'function') {
+        await onSave(); // hace el PUT real (desde Ajustes.jsx)
+        alert('✅ Configuración de notificaciones guardada');
+      } else {
+        alert('❌ Falta conectar onSave desde Ajustes.jsx');
+      }
       onClose();
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -49,84 +83,58 @@ const NotificacionesModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 text-white p-6 rounded-t-2xl">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">🔔 Notificaciones</h2>
-            <button 
-              onClick={onClose}
-              className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+        <HeaderModal onClose={onClose} />
 
-        {/* Contenido */}
         <div className="p-6 space-y-6">
-          {/* Notificaciones de actividad */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-700 text-lg">Actividad</h3>
-            
-            <NotificationToggle 
-              label="Likes en mis publicaciones"
-              checked={notificaciones.likes}
-              onChange={() => toggleNotificacion('likes')}
+          {NOTIFICATION_SECTIONS.map((section, index) => (
+            <NotificationSection
+              key={index}
+              title={section.title}
+              items={section.items}
+              notificaciones={current}
+              onToggle={toggleNotificacion}
             />
-            
-            <NotificationToggle 
-              label="Comentarios"
-              checked={notificaciones.comentarios}
-              onChange={() => toggleNotificacion('comentarios')}
-            />
-            
-            <NotificationToggle 
-              label="Nuevos seguidores"
-              checked={notificaciones.nuevosSeguidores}
-              onChange={() => toggleNotificacion('nuevosSeguidores')}
-            />
-            
-            <NotificationToggle 
-              label="Menciones"
-              checked={notificaciones.menciones}
-              onChange={() => toggleNotificacion('menciones')}
-            />
-            
-            
-          </div>
+          ))}
 
-          {/* Canales de notificación */}
-          <div className="border-t pt-6 space-y-4">
-            <h3 className="font-semibold text-gray-700 text-lg">Canales</h3>
-            
-            <NotificationToggle 
-              label="Notificaciones Push"
-              checked={notificaciones.push}
-              onChange={() => toggleNotificacion('push')}
-            />
-            
-            <NotificationToggle 
-              label="Notificaciones por Email"
-              checked={notificaciones.email}
-              onChange={() => toggleNotificacion('email')}
-            />
-          </div>
-
-          {/* Botón Guardar */}
-          <button 
-            onClick={handleGuardar}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+          <SaveButton loading={loading} onSave={handleGuardar} />
         </div>
       </div>
     </div>
   );
 };
 
-// Componente auxiliar para los toggles
+// ============================================================
+// SUB-COMPONENTS
+// ============================================================
+const HeaderModal = ({ onClose }) => (
+  <div className="sticky top-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 text-white p-6 rounded-t-2xl">
+    <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold">🔔 Notificaciones</h2>
+      <button
+        onClick={onClose}
+        className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+);
+
+const NotificationSection = ({ title, items, notificaciones, onToggle }) => (
+  <div className="space-y-4">
+    <h3 className="font-semibold text-gray-700 text-lg">{title}</h3>
+
+    {items.map((item) => (
+      <NotificationToggle
+        key={item.key}
+        label={item.label}
+        checked={!!notificaciones[item.key]}
+        onChange={() => onToggle(item.key)}
+      />
+    ))}
+  </div>
+);
+
 const NotificationToggle = ({ label, checked, onChange }) => (
   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
     <span className="text-gray-700">{label}</span>
@@ -145,4 +153,15 @@ const NotificationToggle = ({ label, checked, onChange }) => (
   </div>
 );
 
+const SaveButton = ({ loading, onSave }) => (
+  <button
+    onClick={onSave}
+    disabled={loading}
+    className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {loading ? 'Guardando...' : 'Guardar cambios'}
+  </button>
+);
+
 export default NotificacionesModal;
+ 

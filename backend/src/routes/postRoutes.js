@@ -207,7 +207,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // 1. CREAR PUBLICACIÓN
-router.post('/', auth, upload.single('imagen'), async (req, res) => {
+router.post('/', auth, upload.array('imagenes',5), async (req, res) => {
   try {
     console.log('📝 ===== CREANDO NUEVA PUBLICACIÓN =====');
     console.log('📦 Body:', req.body);
@@ -247,11 +247,16 @@ router.post('/', auth, upload.single('imagen'), async (req, res) => {
       }
     };
 
-    if (req.file) {
-      postData.media.images.push(`/uploads/posts/${req.file.filename}`);
-      console.log('✅ Imagen agregada:', postData.media.images[0]);
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        postData.media.images.push(`/uploads/posts/${file.filename}`);
+      });
+      console.log('✅ Imágenes agregadas:', postData.media.images);
     }
 
+
+
+ 
     console.log('💾 Datos del post a guardar:', JSON.stringify(postData, null, 2));
 
     const newPost = new Post(postData);

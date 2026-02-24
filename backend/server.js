@@ -471,9 +471,10 @@ if (services.passportLoaded) {
 try {
   const authRoutes = require('./src/routes/authRoutes');
   app.use('/api/auth', authLimiter, authRoutes);
-  logger.log.success('Rutas de autenticación tradicional cargadas');
+  console.log('✅ authRoutes cargadas correctamente');
 } catch (error) {
-  logger.log.warning('Rutas de autenticación tradicional no disponibles');
+  console.error('❌ ERROR CARGANDO authRoutes:', error.message);
+  console.error(error.stack); // ← esto te mostrará el archivo y línea exacta
 }
 
 // ============================================

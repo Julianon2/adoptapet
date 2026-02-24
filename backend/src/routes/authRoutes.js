@@ -1,6 +1,21 @@
 // =============================================
 // RUTAS DE AUTENTICACIÓN - Adoptapet
 // =============================================
+console.log('✅ authRoutes.js cargando...');
+try {
+  const authController = require('../controllers/authController');
+  console.log('✅ authController OK');
+} catch(e) {
+  console.error('❌ authController FALLA:', e.message);
+}
+try {
+  const { registroValidation } = require('../middleware/validations/authValidations');
+  console.log('✅ authValidations OK');
+} catch(e) {
+  console.error('❌ authValidations FALLA:', e.message);
+}
+
+
 
 const express = require('express');
 const router = express.Router();

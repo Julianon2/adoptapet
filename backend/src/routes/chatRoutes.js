@@ -23,14 +23,25 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// ✅ Helper: obtener el otro participante del chat
+// Helper: obtener el otro participante del chat
 const getOtherUserIdFromChat = (chat, myUserId) => {
   if (!chat?.participants?.length) return null;
   const other = chat.participants.find(p => p.toString() !== myUserId.toString());
   return other ? other.toString() : null;
 };
 
-// ✅ NUEVO: GET /api/chat/unread-count - contador global (badge)
+// Helper: construir URL del avatar (solo para backend)
+const buildAvatarUrl = (avatar, userName) => {
+  if (!avatar) {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
+  }
+  if (!avatar.startsWith('http')) {
+    return `${process.env.API_URL || 'http://localhost:5000'}${avatar}`;
+  }
+  return avatar;
+};
+
+// GET /api/chat/unread-count - contador global (badge)
 router.get('/unread-count', authenticate, async (req, res) => {
   try {
     const userId = req.userId;
@@ -53,7 +64,6 @@ router.get('/', authenticate, async (req, res) => {
     const userId = req.userId;
     console.log('📥 Obteniendo chats para usuario:', userId);
 
-    // Verificar que el usuario existe
     const currentUser = await User.findById(userId);
     if (!currentUser) {
       console.log('❌ Usuario no encontrado:', userId);
@@ -79,8 +89,6 @@ router.get('/', authenticate, async (req, res) => {
       return res.json([]);
     }
 
-    // ✅ NUEVO: Traer no leídos por chat (opcional pero útil)
-    // Contamos mensajes no leídos por chat donde receiver = userId
     const unreadByChatAgg = await Message.aggregate([
       {
         $match: {
@@ -102,15 +110,12 @@ router.get('/', authenticate, async (req, res) => {
       console.log(`📋 Procesando chat ${index + 1}:`, chat._id);
       console.log('👥 Participantes:', chat.participants?.map(p => p?.name || 'Sin nombre'));
 
-      // Buscar el otro participante
       const otherUser = chat.participants?.find(p => {
         if (!p || !p._id) {
           console.warn('⚠️ Participante sin datos:', p);
           return false;
         }
-        const participantId = p._id.toString();
-        const currentUserId = userId.toString();
-        return participantId !== currentUserId;
+        return p._id.toString() !== userId.toString();
       });
 
       if (!otherUser) {
@@ -120,17 +125,8 @@ router.get('/', authenticate, async (req, res) => {
 
       console.log('👤 Otro usuario encontrado:', otherUser.name);
 
-      // Obtener nombre
       const userName = otherUser.name || 'Usuario Desconocido';
-
-      // Asegurar que el avatar tenga la URL completa
-      let avatarUrl = otherUser.avatar;
-      if (!avatarUrl) {
-        avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
-      } else if (!avatarUrl.startsWith('http')) {
-        avatarUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${avatarUrl}`;
-      }
-
+      const avatarUrl = buildAvatarUrl(otherUser.avatar, userName); // ✅ corregido
       const unread = unreadMap.get(chat._id.toString()) || 0;
 
       return {
@@ -140,7 +136,7 @@ router.get('/', authenticate, async (req, res) => {
         avatar: avatarUrl,
         lastMessage: chat.lastMessage || 'Sin mensajes',
         online: false,
-        unread, // ✅ ahora sí real
+        unread,
         petRelated: chat.petRelated,
         updatedAt: chat.updatedAt
       };
@@ -150,10 +146,6 @@ router.get('/', authenticate, async (req, res) => {
     res.json(formattedChats);
   } catch (error) {
     console.error('❌ Error completo al obtener chats:', error);
-    console.error('❌ Stack:', error.stack);
-    console.error('❌ Nombre del error:', error.name);
-    console.error('❌ Mensaje:', error.message);
-
     res.status(500).json({
       error: 'Error al obtener chats',
       message: error.message,
@@ -163,14 +155,12 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // GET /api/chat/:chatId/messages - Obtener mensajes de un chat
-// ✅ Además: marca como leído automáticamente lo que el usuario recibió en ese chat
 router.get('/:chatId/messages', authenticate, async (req, res) => {
   try {
     const { chatId } = req.params;
     const userId = req.userId;
     console.log('📥 Obteniendo mensajes del chat:', chatId);
 
-    // Verificar que el chat existe y el usuario tiene acceso
     const chat = await Chat.findById(chatId);
     if (!chat) {
       return res.status(404).json({ error: 'Chat no encontrado' });
@@ -181,7 +171,6 @@ router.get('/:chatId/messages', authenticate, async (req, res) => {
       return res.status(403).json({ error: 'No tienes acceso a este chat' });
     }
 
-    // ✅ NUEVO: marcar como leído todos los mensajes recibidos por userId en este chat
     const now = new Date();
     await Message.updateMany(
       { chat: chatId, receiver: userId, readAt: null },
@@ -197,7 +186,6 @@ router.get('/:chatId/messages', authenticate, async (req, res) => {
       .lean();
 
     const formattedMessages = messages.map(msg => {
-      const senderName = msg.sender?.name || 'Usuario';
       const senderId = msg.sender?._id?.toString();
 
       return {
@@ -209,10 +197,8 @@ router.get('/:chatId/messages', authenticate, async (req, res) => {
         }),
         sender: senderId === userId ? 'me' : 'other',
         senderId: senderId,
-        senderName: senderName,
+        senderName: msg.sender?.name || 'Usuario',
         senderAvatar: msg.sender?.avatar,
-
-        // ✅ NUEVO: para que tu frontend pinte checks
         status: msg.status || 'sent',
         readAt: msg.readAt || null,
         deliveredAt: msg.deliveredAt || null,
@@ -224,7 +210,6 @@ router.get('/:chatId/messages', authenticate, async (req, res) => {
     res.json(formattedMessages);
   } catch (error) {
     console.error('❌ Error al obtener mensajes:', error);
-    console.error('❌ Stack:', error.stack);
     res.status(500).json({
       error: 'Error al obtener mensajes',
       message: error.message
@@ -232,7 +217,7 @@ router.get('/:chatId/messages', authenticate, async (req, res) => {
   }
 });
 
-// POST /api/chat/:chatId/messages - Enviar un mensaje en un chat
+// POST /api/chat/:chatId/messages - Enviar un mensaje
 router.post('/:chatId/messages', authenticate, async (req, res) => {
   try {
     const { chatId } = req.params;
@@ -240,36 +225,30 @@ router.post('/:chatId/messages', authenticate, async (req, res) => {
     const userId = req.userId;
 
     console.log('📤 Enviando mensaje en chat:', chatId);
-    console.log('📝 Texto del mensaje:', text);
-    console.log('👤 Remitente:', userId);
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({ error: 'El mensaje no puede estar vacío' });
     }
 
-    // Verificar que el chat existe
     const chat = await Chat.findById(chatId);
     if (!chat) {
       return res.status(404).json({ error: 'Chat no encontrado' });
     }
 
-    // Verificar que el usuario es parte del chat
     const hasAccess = chat.participants.some(p => p.toString() === userId);
     if (!hasAccess) {
       return res.status(403).json({ error: 'No tienes acceso a este chat' });
     }
 
-    // ✅ PASO 0: determinar el receptor (receiver) automáticamente
     const otherUserId = getOtherUserIdFromChat(chat, userId);
     if (!otherUserId) {
       return res.status(400).json({ error: 'No se pudo determinar el receptor' });
     }
 
-    // Crear el mensaje (con receiver y status)
     const message = new Message({
       chat: chatId,
       sender: userId,
-      receiver: otherUserId, // ✅ CLAVE para visto/contador
+      receiver: otherUserId,
       text: text.trim(),
       status: 'sent'
     });
@@ -277,20 +256,12 @@ router.post('/:chatId/messages', authenticate, async (req, res) => {
     await message.save();
     console.log('✅ Mensaje guardado:', message._id);
 
-    // Actualizar el chat con el último mensaje
     chat.lastMessage = text.trim();
     chat.updatedAt = new Date();
     await chat.save();
 
-    // Poblar el sender para devolver la información completa
-    await message.populate({
-      path: 'sender',
-      select: 'name avatar'
-    });
+    await message.populate({ path: 'sender', select: 'name avatar' });
 
-    const senderName = message.sender?.name || 'Usuario';
-
-    // Formatear la respuesta
     const formattedMessage = {
       id: message._id.toString(),
       text: message.text,
@@ -300,10 +271,8 @@ router.post('/:chatId/messages', authenticate, async (req, res) => {
       }),
       sender: 'me',
       senderId: message.sender._id.toString(),
-      senderName: senderName,
+      senderName: message.sender?.name || 'Usuario',
       senderAvatar: message.sender.avatar,
-
-      // ✅ NUEVO: checks
       status: message.status,
       readAt: message.readAt || null,
       deliveredAt: message.deliveredAt || null,
@@ -314,7 +283,6 @@ router.post('/:chatId/messages', authenticate, async (req, res) => {
     res.status(201).json(formattedMessage);
   } catch (error) {
     console.error('❌ Error al enviar mensaje:', error);
-    console.error('❌ Stack:', error.stack);
     res.status(500).json({
       error: 'Error al enviar mensaje',
       message: error.message
@@ -322,7 +290,7 @@ router.post('/:chatId/messages', authenticate, async (req, res) => {
   }
 });
 
-// ✅ NUEVO: POST /api/chat/:chatId/read - marcar leído (si quieres llamarlo desde React o Socket)
+// POST /api/chat/:chatId/read - marcar leído
 router.post('/:chatId/read', authenticate, async (req, res) => {
   try {
     const { chatId } = req.params;
@@ -335,7 +303,6 @@ router.post('/:chatId/read', authenticate, async (req, res) => {
     if (!hasAccess) return res.status(403).json({ error: 'No tienes acceso a este chat' });
 
     const now = new Date();
-
     const result = await Message.updateMany(
       { chat: chatId, receiver: userId, readAt: null },
       { $set: { read: true, readAt: now, status: 'read' } }
@@ -359,7 +326,6 @@ router.post('/', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Se requiere el ID del otro usuario' });
     }
 
-    // Verificar que ambos usuarios existen
     const [currentUser, otherUser] = await Promise.all([
       User.findById(userId),
       User.findById(otherUserId)
@@ -371,7 +337,6 @@ router.post('/', authenticate, async (req, res) => {
 
     console.log('✅ Usuarios verificados:', currentUser.name, 'y', otherUser.name);
 
-    // Verificar si ya existe un chat entre estos usuarios
     let chat = await Chat.findOne({
       participants: { $all: [userId, otherUserId] }
     });
@@ -387,20 +352,11 @@ router.post('/', authenticate, async (req, res) => {
       console.log('ℹ️ Chat ya existía:', chat._id);
     }
 
-    await chat.populate({
-      path: 'participants',
-      select: 'name email avatar'
-    });
+    await chat.populate({ path: 'participants', select: 'name email avatar' });
 
     const otherParticipant = chat.participants.find(p => p._id.toString() !== userId);
     const userName = otherParticipant?.name || 'Usuario';
-
-    let avatarUrl = otherParticipant?.avatar;
-    if (!avatarUrl) {
-      avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
-    } else if (!avatarUrl.startsWith('http')) {
-      avatarUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${avatarUrl}`;
-    }
+    const avatarUrl = buildAvatarUrl(otherParticipant?.avatar, userName); // ✅ corregido
 
     res.status(201).json({
       id: chat._id.toString(),
@@ -413,7 +369,6 @@ router.post('/', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error al crear chat:', error);
-    console.error('❌ Stack:', error.stack);
     res.status(500).json({
       error: 'Error al crear chat',
       message: error.message

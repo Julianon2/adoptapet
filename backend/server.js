@@ -38,7 +38,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // ============================================
-// 1. CORS
+// 1. CORS — ✅ CORREGIDO: URLs de producción agregadas
 // ============================================
 const corsOptions = {
   origin: function (origin, callback) {
@@ -47,14 +47,18 @@ const corsOptions = {
       'http://127.0.0.1:3000',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
-      'https://adoptapet.up.railway.app'
-    ];
+      // ✅ URLs de producción en Railway
+      'https://adoptapet.up.railway.app',
+      'https://adoptapet-production-9df1.up.railway.app',
+      // ✅ Variable de entorno opcional para mayor flexibilidad
+      process.env.FRONTEND_URL
+    ].filter(Boolean); // elimina undefined si FRONTEND_URL no está definida
     
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.warn('⚠️  Origen bloqueado por CORS:', origin);
       callback(new Error('No permitido por CORS'));
-      
     }
   },
   credentials: true,
@@ -72,7 +76,7 @@ console.log('✅ CORS configurado con soporte para uploads');
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false,        // ✅ FIX: evita header CORS duplicado "*, *"
+  crossOriginOpenerPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 

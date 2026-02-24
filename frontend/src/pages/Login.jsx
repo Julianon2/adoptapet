@@ -14,16 +14,16 @@ function Login() {
   const [messageType, setMessageType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const LOGIN_API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`;
+  // ✅ URL del backend: usa variable de entorno en producción, localhost en desarrollo
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const LOGIN_API_URL = `${API_BASE}/api`;
 
-  // ✅ CORREGIDO: redirigir a /home (no a /)
   useEffect(() => {
     if (localStorage.getItem('token')) {
       navigate('/home', { replace: true });
     }
-  }, []); // ✅ Sin 'navigate' en dependencias para evitar loops
+  }, []);
 
-  // Mostrar mensaje si viene de verificación exitosa
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
       setMessage('✅ Email verificado correctamente. Ahora puedes iniciar sesión.');
@@ -41,6 +41,8 @@ function Login() {
     setMessage('');
 
     try {
+      console.log('🌐 Conectando a:', `${LOGIN_API_URL}/auth/login`);
+
       const response = await fetch(`${LOGIN_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -60,7 +62,6 @@ function Login() {
         setMessage('✅ Login exitoso. Redirigiendo...');
         setMessageType('success');
 
-        // ✅ CORREGIDO: redirigir a /home (no a /)
         setTimeout(() => navigate('/home', { replace: true }), 1500);
 
       } else if (data.requiresVerification) {
@@ -79,6 +80,7 @@ function Login() {
 
     } catch (error) {
       console.error('❌ Error en login:', error);
+      console.error('🌐 URL usada:', `${LOGIN_API_URL}/auth/login`);
       setMessage('❌ Error al conectar con el servidor.');
       setMessageType('error');
       setIsLoading(false);
@@ -86,7 +88,7 @@ function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`;
+    window.location.href = `${API_BASE}/api/auth/google`;
   };
 
   return (

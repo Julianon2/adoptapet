@@ -332,7 +332,7 @@ const PostCard = ({ post, currentUser, onDelete, onLike, onComment, onEdit }) =>
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         if (imagePath.startsWith('http')) return imagePath;
-        return `http://localhost:5000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+        return `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
     };
 
     const getPostImages = () => {

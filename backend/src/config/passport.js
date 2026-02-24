@@ -9,7 +9,7 @@ const User = require('../models/User');
 console.log('🔐 Inicializando Passport con Google OAuth...');
 console.log('   Client ID:', process.env.GOOGLE_CLIENT_ID ? '✅ Configurado' : '❌ NO configurado');
 console.log('   Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? '✅ Configurado' : '❌ NO configurado');
-console.log('   Callback URL:', process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback');
+console.log('   Callback URL:', process.env.GOOGLE_CALLBACK_URL || '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/google/callback');
 
 // Verificar que las variables existen
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -27,7 +27,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback', // ✅ CORREGIDO
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/google/callback', // ✅ CORREGIDO
       proxy: true
     },
     

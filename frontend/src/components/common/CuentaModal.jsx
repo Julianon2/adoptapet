@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // ============================================================
 // CONSTANTS
 // ============================================================
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api';
 
 const BUTTON_STYLES = {
   gradientBlue: 'bg-gradient-to-r from-blue-500 to-purple-600',

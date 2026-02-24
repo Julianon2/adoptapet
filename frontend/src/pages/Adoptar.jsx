@@ -23,7 +23,7 @@ export default function Adoptar() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/pets/adopcion');
+      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pets/adopcion');
       if (!response.ok) throw new Error('Error al cargar mascotas');
       const result = await response.json();
 
@@ -36,8 +36,8 @@ export default function Adoptar() {
 
       const formattedPets = data.map(pet => {
         let photos = [];
-        if (pet.photos?.length > 0) photos = pet.photos.map(p => `http://localhost:5000${p}`);
-        else if (pet.mainPhoto) photos = [`http://localhost:5000${pet.mainPhoto}`];
+        if (pet.photos?.length > 0) photos = pet.photos.map(p => `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p}`);
+        else if (pet.mainPhoto) photos = [`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${pet.mainPhoto}`];
         return {
           _id: pet._id, id: pet._id,
           name: pet.name || 'Sin nombre',
@@ -52,7 +52,7 @@ export default function Adoptar() {
           genderFormatted: pet.gender ? (pet.gender.charAt(0).toUpperCase() + pet.gender.slice(1)) : 'Desconocido',
           location: pet.location || { city: 'No especificada' },
           description: pet.description || 'Sin descripción',
-          photos, mainPhoto: pet.mainPhoto ? `http://localhost:5000${pet.mainPhoto}` : null,
+          photos, mainPhoto: pet.mainPhoto ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${pet.mainPhoto}` : null,
           vaccinated: pet.healthInfo?.vaccinated || false,
           sterilized: pet.healthInfo?.sterilized || false,
           featured: pet.featured || false,

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Check } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api';
 
 const testConnection = async () => {
   try {
-    const response = await fetch('http://localhost:5000/health');
+    const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/health');
     const data = await response.json();
     console.log('Backend conectado:', data);
     return true;
@@ -177,7 +177,7 @@ export default function Registro() {
     console.log('🔍 Iniciando Google Login...');
 
     try {
-      const response = await fetch('http://localhost:5000/health');
+      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/health');
       const data = await response.json();
 
       console.log('✅ Backend activo:', data);
@@ -191,7 +191,7 @@ export default function Registro() {
       }
 
       console.log('🔄 Redirigiendo a Google OAuth...');
-      window.location.href = 'http://localhost:5000/auth/google';
+      window.location.href = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/google';
 
     } catch (err) {
       console.error('❌ Error al verificar backend:', err);

@@ -83,7 +83,7 @@ export default function Header({ onOpenModal }) {
   const location = useLocation();
   const searchRef = useRef(null);
   const mobileSearchRef = useRef(null);
-  const API_BASE = 'http://localhost:5000';
+  const API_BASE = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
 
   const isActive = (path) => location.pathname.toLowerCase() === path.toLowerCase();
 

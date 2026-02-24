@@ -59,7 +59,7 @@ export default function AIAssistant() {
       if (imageFile) {
         const reader = new FileReader();
         reader.onloadend = async () => {
-          const response = await fetch('http://localhost:5000/api/ai/identify-breed', {
+          const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/identify-breed', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ imageBase64: reader.result })
@@ -77,7 +77,7 @@ export default function AIAssistant() {
         };
         reader.readAsDataURL(imageFile);
       } else {
-        const response = await fetch('http://localhost:5000/api/ai/chat', {
+        const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ message: inputMessage, conversationHistory: messages })

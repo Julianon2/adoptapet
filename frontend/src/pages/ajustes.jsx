@@ -8,7 +8,7 @@ import NotificacionesModal from '../components/common/NotificacionesModal';
 import PublicacionesModal from '../components/common/PublicacionesModal';
 import EtiquetadoModal from '../components/common/EtiquetadoModal';
 
-const API_URL = "http://localhost:5000";
+const API_URL = "${import.meta.env.VITE_API_URL || 'http://localhost:5000'}";
 
 const Ajustes = () => {
   const [modalCuenta, setModalCuenta] = useState(false);

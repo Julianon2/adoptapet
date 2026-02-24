@@ -50,7 +50,7 @@ export default function AdminPanel() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `http://localhost:5000/api/posts/admin/all?filter=${filter}&page=${currentPage}&limit=20`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/admin/all?filter=${filter}&page=${currentPage}&limit=20`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -82,7 +82,7 @@ export default function AdminPanel() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `http://localhost:5000/api/posts/admin/${postId}/moderate`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/admin/${postId}/moderate`,
         {
           method: 'POST',
           headers: {
@@ -114,7 +114,7 @@ export default function AdminPanel() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `http://localhost:5000/api/posts/admin/${postId}/restore`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/admin/${postId}/restore`,
         {
           method: 'POST',
           headers: {
@@ -151,7 +151,7 @@ export default function AdminPanel() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `http://localhost:5000/api/posts/admin/${postId}/permanent`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/admin/${postId}/permanent`,
         {
           method: 'DELETE',
           headers: {
@@ -317,7 +317,7 @@ export default function AdminPanel() {
                       {post.media.images.map((img, idx) => (
                         <img
                           key={idx}
-                          src={`http://localhost:5000${img}`}
+                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img}`}
                           alt="Post"
                           className="rounded-lg w-full h-48 object-cover"
                         />

@@ -65,7 +65,7 @@ export default function Home() {
         const token = localStorage.getItem('token');
         if (!token) { setError('Debes iniciar sesión para ver las publicaciones'); setLoading(false); return; }
 
-        const response = await fetch('http://localhost:5000/api/posts', {
+        const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts', {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });

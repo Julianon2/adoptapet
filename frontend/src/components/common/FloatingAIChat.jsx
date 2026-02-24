@@ -98,7 +98,7 @@ export default function FloatingAIChat() {
         reader.onloadend = async () => {
           const base64Image = reader.result;
 
-          const response = await fetch('http://localhost:5000/api/ai/identify-breed', {
+          const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/identify-breed', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ export default function FloatingAIChat() {
         reader.readAsDataURL(imageFile);
 
       } else {
-        const response = await fetch('http://localhost:5000/api/ai/chat', {
+        const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

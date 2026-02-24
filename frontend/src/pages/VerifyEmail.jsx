@@ -79,7 +79,7 @@ export default function VerifyEmail() {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: fullCode })
@@ -122,7 +122,7 @@ export default function VerifyEmail() {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

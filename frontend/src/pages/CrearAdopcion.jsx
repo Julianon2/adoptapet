@@ -189,7 +189,7 @@ const CrearAdopcion = () => {
       console.log('📊 Tamaños de imágenes:', adoptionImageFiles.map(f => `${f.name}: ${(f.size / 1024).toFixed(2)}KB`));
 
       const response = await fetch(
-        "http://localhost:5000/api/pets/publicar-adopcion",
+        "${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pets/publicar-adopcion",
         {
           method: "POST",
           headers: {

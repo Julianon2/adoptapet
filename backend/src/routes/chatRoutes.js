@@ -128,7 +128,7 @@ router.get('/', authenticate, async (req, res) => {
       if (!avatarUrl) {
         avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
       } else if (!avatarUrl.startsWith('http')) {
-        avatarUrl = `http://localhost:5000${avatarUrl}`;
+        avatarUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${avatarUrl}`;
       }
 
       const unread = unreadMap.get(chat._id.toString()) || 0;
@@ -399,7 +399,7 @@ router.post('/', authenticate, async (req, res) => {
     if (!avatarUrl) {
       avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
     } else if (!avatarUrl.startsWith('http')) {
-      avatarUrl = `http://localhost:5000${avatarUrl}`;
+      avatarUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${avatarUrl}`;
     }
 
     res.status(201).json({

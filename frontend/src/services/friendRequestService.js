@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/friend-requests';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/friend-requests`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -101,7 +101,7 @@ export const friendRequestService = {
     }
   },
 
-  // ✅ CORREGIDO: Verificar estado de amistad
+  // Verificar estado de amistad
   checkFriendshipStatus: async (userId) => {
     try {
       console.log('🔍 Verificando estado de amistad con:', userId);
@@ -110,11 +110,10 @@ export const friendRequestService = {
         getAuthHeaders()
       );
       console.log('✅ Estado recibido:', response.data);
-      // ✅ Retornar response.data.status, NO response.status
-      return response.data.status; // ← ESTO ES LO QUE ESTABA MAL
+      return response.data.status;
     } catch (error) {
       console.error('❌ Error al verificar estado:', error.response?.data || error.message);
-      return 'none'; // Retornar 'none' en caso de error
+      return 'none';
     }
   },
 

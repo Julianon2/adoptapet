@@ -7,6 +7,8 @@ import PetModal from '../components/common/PetModal';
 import FilterSection from '../components/adoptar/FilterSection';
 import { PawPrint } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Adoptar() {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function Adoptar() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pets/adopcion');
+      const response = await fetch(`${API_BASE}/api/pets/adopcion`);
       if (!response.ok) throw new Error('Error al cargar mascotas');
       const result = await response.json();
 
@@ -36,8 +38,8 @@ export default function Adoptar() {
 
       const formattedPets = data.map(pet => {
         let photos = [];
-        if (pet.photos?.length > 0) photos = pet.photos.map(p => `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p}`);
-        else if (pet.mainPhoto) photos = [`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${pet.mainPhoto}`];
+        if (pet.photos?.length > 0) photos = pet.photos.map(p => `${API_BASE}${p}`);
+        else if (pet.mainPhoto) photos = [`${API_BASE}${pet.mainPhoto}`];
         return {
           _id: pet._id, id: pet._id,
           name: pet.name || 'Sin nombre',
@@ -52,7 +54,7 @@ export default function Adoptar() {
           genderFormatted: pet.gender ? (pet.gender.charAt(0).toUpperCase() + pet.gender.slice(1)) : 'Desconocido',
           location: pet.location || { city: 'No especificada' },
           description: pet.description || 'Sin descripción',
-          photos, mainPhoto: pet.mainPhoto ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${pet.mainPhoto}` : null,
+          photos, mainPhoto: pet.mainPhoto ? `${API_BASE}${pet.mainPhoto}` : null,
           vaccinated: pet.healthInfo?.vaccinated || false,
           sterilized: pet.healthInfo?.sterilized || false,
           featured: pet.featured || false,
@@ -184,7 +186,6 @@ export default function Adoptar() {
           )}
         </div>
       </div>
-
 
       {selectedPet && <PetModal pet={selectedPet} onClose={() => setSelectedPet(null)} />}
     </div>

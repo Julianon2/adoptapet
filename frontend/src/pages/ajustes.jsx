@@ -8,7 +8,7 @@ import NotificacionesModal from '../components/common/NotificacionesModal';
 import PublicacionesModal from '../components/common/PublicacionesModal';
 import EtiquetadoModal from '../components/common/EtiquetadoModal';
 
-const API_URL = "${import.meta.env.VITE_API_URL || 'http://localhost:5000'}";
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`; // ✅ backticks
 
 const Ajustes = () => {
   const [modalCuenta, setModalCuenta] = useState(false);
@@ -16,7 +16,6 @@ const Ajustes = () => {
   const [modalPublicaciones, setModalPublicaciones] = useState(false);
   const [modalEtiquetado, setModalEtiquetado] = useState(false);
 
-  // Estado global de ajustes de publicaciones/cuenta
   const [settings, setSettings] = useState({
     privacidadPorDefecto: 'publico',
     permitirComentarios: true,
@@ -26,7 +25,6 @@ const Ajustes = () => {
     archivarAutomatico: false,
   });
 
-  // ✅ Estado específico para notificaciones
   const [notificationSettings, setNotificationSettings] = useState({
     likes: true,
     comments: true,
@@ -37,33 +35,51 @@ const Ajustes = () => {
 
   const token = localStorage.getItem('token');
 
-  // Obtener ajustes generales
+  // ✅ Cargar ajustes de publicaciones desde la ruta correcta
   useEffect(() => {
-    fetch(`${API_URL}/api/settings`, {
+    fetch(`${API_URL}/api/users/me/post-settings`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.settings) {
-          setSettings(data.settings);
+        if (data && !data.success === false) {
+          setSettings(prev => ({ ...prev, ...data }));
         }
       })
       .catch(err => console.error("Error obteniendo ajustes:", err));
   }, []);
 
-  // Guardar ajustes generales
+  // ✅ Cargar ajustes de notificaciones
+  useEffect(() => {
+    fetch(`${API_URL}/api/users/notification-settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.notificationSettings) {
+          setNotificationSettings(data.notificationSettings);
+        }
+      })
+      .catch(err => console.error("Error obteniendo notificaciones:", err));
+  }, []);
+
+  // ✅ Guardar ajustes de publicaciones en la ruta correcta
   const handleGuardar = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/settings`, {
+      const res = await fetch(`${API_URL}/api/users/me/post-settings`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          privacidadPorDefecto: settings.privacidadPorDefecto,
+          permitirComentarios: settings.permitirComentarios,
+          permitirCompartir: settings.permitirCompartir,
+        }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data) {
         alert("✔️ Ajustes guardados correctamente");
       } else {
         alert("❌ No se pudieron guardar los ajustes");
@@ -130,7 +146,6 @@ const Ajustes = () => {
         setSettings={setSettings}
       />
 
-      {/* ✅ CORREGIDO: props correctas para NotificacionesModal */}
       <NotificacionesModal
         isOpen={modalNotificaciones}
         onClose={() => setModalNotificaciones(false)}
@@ -144,6 +159,7 @@ const Ajustes = () => {
         onClose={() => setModalPublicaciones(false)}
         settings={settings}
         setSettings={setSettings}
+        onSave={handleGuardar}
       />
 
       <EtiquetadoModal

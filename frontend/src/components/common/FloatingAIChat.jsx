@@ -21,6 +21,8 @@ export default function FloatingAIChat() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   // Auto-scroll al último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -98,7 +100,7 @@ export default function FloatingAIChat() {
         reader.onloadend = async () => {
           const base64Image = reader.result;
 
-          const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/identify-breed', {
+          const response = await fetch(`${API_BASE}/api/ai/identify-breed`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -138,7 +140,7 @@ export default function FloatingAIChat() {
         reader.readAsDataURL(imageFile);
 
       } else {
-        const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/chat', {
+        const response = await fetch(`${API_BASE}/api/ai/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,7 +205,6 @@ export default function FloatingAIChat() {
             <div className="bg-gradient-to-r from-orange-400 to-amber-600 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1">
-                  {/* 🐶 Imagen del perro */}
                   <img 
                     src="/robot-dog.png" 
                     alt="VetAssist" 
@@ -368,7 +369,6 @@ export default function FloatingAIChat() {
         className="fixed bottom-6 right-6 w-24 h-24 z-50 hover:scale-110 transition-transform duration-300 group"
         style={{ background: 'transparent', border: 'none' }}
       >
-        {/* 🐶 Solo la imagen del perro */}
         <img 
           src="/robot-dog.png" 
           alt="VetAssist" 

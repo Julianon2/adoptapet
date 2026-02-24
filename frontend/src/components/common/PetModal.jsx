@@ -68,15 +68,17 @@ const PetModal = ({ pet, onClose }) => {
 
       console.log('📤 Creando chat con owner ID:', ownerId);
       console.log('📤 Owner nombre:', pet.owner.nombre || pet.owner.name || 'Desconocido');
-      
-      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/chat', {
+
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          otherUserId: ownerId  // ✅ CORRECTO - backend espera otherUserId
+          otherUserId: ownerId
         })
       });
 

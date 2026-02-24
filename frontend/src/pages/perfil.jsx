@@ -3,7 +3,7 @@ import axios from 'axios';
 import { friendRequestService } from '../services/friendRequestService';
 
 // ✅ URL base unificada — antes estaba mezclado 127.0.0.1 y localhost
-const API = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function Perfil() {
   const [user, setUser] = useState(null);
@@ -424,14 +424,13 @@ function Perfil() {
           <div className="relative px-6 py-12">
             <div className="flex flex-col sm:flex-row items-center sm:items-end">
               <div className="relative group">
-                {/* ✅ FIX: e.target.onerror = null evita el loop infinito */}
                 <img
                   key={avatarUrl}
                   src={avatarUrl}
                   alt="Foto de perfil"
                   className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg object-cover"
                   onError={(e) => {
-                    e.target.onerror = null; // ← CRÍTICO: corta el loop
+                    e.target.onerror = null;
                     e.target.src = getAvatarFallback(userName);
                   }}
                   crossOrigin="anonymous"
@@ -487,7 +486,6 @@ function Perfil() {
                       <div key={post._id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
                         <div className="p-4 flex items-center justify-between border-b">
                           <div className="flex items-center gap-3">
-                            {/* ✅ FIX: onerror = null en posts también */}
                             <img
                               src={post.author?.avatar || avatarUrl}
                               alt={post.author?.nombre || post.author?.name || userName}
@@ -511,7 +509,6 @@ function Perfil() {
                             />
                           </div>
                         )}
-                        {/* Soporte para campo images legacy */}
                         {!post.media?.images && post.images && post.images.length > 0 && (
                           <div className="w-full">
                             <img
@@ -540,7 +537,6 @@ function Perfil() {
 
             {activeTab === 'solicitudes' && (
               <div className="space-y-8">
-                {/* Solicitudes de AMISTAD */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">{friendRequests.length}</span>
@@ -576,7 +572,6 @@ function Perfil() {
                   )}
                 </div>
 
-                {/* Solicitudes de ADOPCIÓN */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{applications.length}</span>
@@ -678,7 +673,6 @@ function Perfil() {
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <div className="relative inline-block group">
-                  {/* ✅ FIX: onerror = null en modal también */}
                   <img
                     key={avatarUrl}
                     src={avatarUrl}

@@ -1,13 +1,21 @@
 // frontend/src/hooks/useSocket.js
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+const SOCKET_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`;
+
+let globalSocket = null; // ✅ instancia compartida para evitar doble conexión en StrictMode
 
 export const useSocket = () => {
-  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
+    // Si ya hay un socket conectado, reutilizarlo
+    if (globalSocket && globalSocket.connected) {
+      socketRef.current = globalSocket;
+      return;
+    }
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserId = String(user?.id || user?._id || '');
 
@@ -18,6 +26,9 @@ export const useSocket = () => {
       reconnectionAttempts: 10,
       reconnectionDelay: 500
     });
+
+    globalSocket = s;
+    socketRef.current = s;
 
     const registerPresence = () => {
       if (currentUserId) {
@@ -33,7 +44,6 @@ export const useSocket = () => {
       registerPresence();
     });
 
-    // ✅ si reconecta, volvemos a registrar presencia
     s.io.on('reconnect', () => {
       console.log('🔄 Socket reconectado');
       registerPresence();
@@ -47,48 +57,24 @@ export const useSocket = () => {
       console.error('❌ connect_error Socket.io:', err.message);
     });
 
-    /**
-     * ✅ ACTUALIZADO:
-     * backend ahora emite:
-     *  - chatUnreadCount: cantidad de chats con no leídos (badge del Header)
-     *  - unreadByChat: { chatId: cantidadMensajesSinLeer } (para ChatList)
-     */
     s.on('unread_count', ({ chatUnreadCount, unreadByChat }) => {
       const safeChats = Number.isFinite(chatUnreadCount) ? chatUnreadCount : 0;
-
-      // badge del Header (solo chats)
       localStorage.setItem('chat_unread_count', String(safeChats));
-
-      // mapa por chat (para bandeja / ChatList)
       localStorage.setItem('chat_unread_by_chat', JSON.stringify(unreadByChat || {}));
-
-      // 🔔 eventos para que otros componentes reaccionen en tiempo real
-      window.dispatchEvent(
-        new CustomEvent('chat_unread_count', { detail: { count: safeChats } })
-      );
-
-      window.dispatchEvent(
-        new CustomEvent('chat_unread_by_chat', {
-          detail: { unreadByChat: unreadByChat || {} }
-        })
-      );
+      window.dispatchEvent(new CustomEvent('chat_unread_count', { detail: { count: safeChats } }));
+      window.dispatchEvent(new CustomEvent('chat_unread_by_chat', { detail: { unreadByChat: unreadByChat || {} } }));
     });
 
-    // ✅ evento cuando el otro leyó mensajes de un chat (✔✔ púrpura)
     s.on('messages_read', (payload) => {
-      // payload: { chatId, readAt, readerId }
       window.dispatchEvent(new CustomEvent('chat_messages_read', { detail: payload }));
     });
 
-    setSocket(s);
-
+    // Solo limpiar listeners, NO desconectar (evita problema de StrictMode)
     return () => {
       s.off('unread_count');
       s.off('messages_read');
-      s.disconnect();
-      console.log('🔌 Socket desconectado');
     };
   }, []);
 
-  return socket;
+  return socketRef.current;
 };

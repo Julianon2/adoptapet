@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Check } from 'lucide-react';
 
-const API_URL = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = `${API_BASE}/api`;
 
 const testConnection = async () => {
   try {
-    const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/health');
+    const response = await fetch(`${API_BASE}/health`);
     const data = await response.json();
     console.log('Backend conectado:', data);
     return true;
@@ -154,7 +155,6 @@ export default function Registro() {
           type: 'success'
         });
 
-        // ✅ CORREGIDO: Redirigir a verificación de email en lugar del home
         setTimeout(() => {
           navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`);
         }, 1500);
@@ -170,14 +170,13 @@ export default function Registro() {
     }
   };
 
-  // Google Login
   const handleGoogleLogin = async (e) => {
     e.preventDefault();
 
     console.log('🔍 Iniciando Google Login...');
 
     try {
-      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/health');
+      const response = await fetch(`${API_BASE}/health`);
       const data = await response.json();
 
       console.log('✅ Backend activo:', data);
@@ -191,7 +190,7 @@ export default function Registro() {
       }
 
       console.log('🔄 Redirigiendo a Google OAuth...');
-      window.location.href = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/google';
+      window.location.href = `${API_BASE}/auth/google`;
 
     } catch (err) {
       console.error('❌ Error al verificar backend:', err);

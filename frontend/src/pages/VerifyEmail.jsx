@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -79,7 +81,7 @@ export default function VerifyEmail() {
     setMessage('');
 
     try {
-      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify-email', {
+      const response = await fetch(`${API_BASE}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: fullCode })
@@ -88,13 +90,11 @@ export default function VerifyEmail() {
       const data = await response.json();
 
       if (data.success) {
-        // ✅ Guardar token y usuario para quedar autenticado
         if (data.token) localStorage.setItem('token', data.token);
         if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
 
         setMessage('✅ ' + data.message);
 
-        // ✅ Ir al Home directo
         setTimeout(() => navigate('/'), 1000);
 
       } else {
@@ -122,7 +122,7 @@ export default function VerifyEmail() {
     setMessage('');
 
     try {
-      const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/resend-verification', {
+      const response = await fetch(`${API_BASE}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

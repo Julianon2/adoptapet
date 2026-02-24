@@ -4,6 +4,8 @@ import Sidebar from '../components/common/Sidebar';
 
 import { Send, Camera, AlertCircle, Sparkles } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AIAssistant() {
   const [messages, setMessages] = useState([
     {
@@ -59,7 +61,7 @@ export default function AIAssistant() {
       if (imageFile) {
         const reader = new FileReader();
         reader.onloadend = async () => {
-          const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/identify-breed', {
+          const response = await fetch(`${API_BASE}/api/ai/identify-breed`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ imageBase64: reader.result })
@@ -77,7 +79,7 @@ export default function AIAssistant() {
         };
         reader.readAsDataURL(imageFile);
       } else {
-        const response = await fetch('${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/chat', {
+        const response = await fetch(`${API_BASE}/api/ai/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ message: inputMessage, conversationHistory: messages })
@@ -215,8 +217,6 @@ export default function AIAssistant() {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 }

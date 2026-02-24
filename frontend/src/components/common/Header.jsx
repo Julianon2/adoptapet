@@ -83,7 +83,7 @@ export default function Header({ onOpenModal }) {
   const location = useLocation();
   const searchRef = useRef(null);
   const mobileSearchRef = useRef(null);
-  const API_BASE = '${import.meta.env.VITE_API_URL || 'http://localhost:5000'}';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const isActive = (path) => location.pathname.toLowerCase() === path.toLowerCase();
 
@@ -602,7 +602,7 @@ export default function Header({ onOpenModal }) {
       <nav
         className={`hmb-drawer ${drawerOpen ? 'open' : ''}`}
         aria-label="Menú principal"
-        inert={!drawerOpen ?true : undefined}
+        {...(!drawerOpen && { inert: '' })}
       >
         {/* Stripe */}
         <div className="hmb-stripe" />

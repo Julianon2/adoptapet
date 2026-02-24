@@ -8,6 +8,7 @@ import PublishOptions from "../components/common/PublishOptions";
 import PublishFooter from "../components/common/PublishFooter";
 
 const MAX_IMAGES = 5;
+const API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`; // ✅ definido una sola vez
 
 const Publicar = () => {
   const [loading, setLoading]   = useState(false);
@@ -15,10 +16,8 @@ const Publicar = () => {
   const [success, setSuccess]   = useState(false);
   const [momentText, setMomentText] = useState("");
 
-  // ── Múltiples imágenes: array de { preview, file } ──────────────────
-  const [images, setImages] = useState([]); // [{ preview: string, file: File }]
+  const [images, setImages] = useState([]);
 
-  // Agregar imágenes (hasta MAX_IMAGES en total)
   const handleImages = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -36,28 +35,23 @@ const Publicar = () => {
 
     setImages(prev => [...prev, ...toAdd]);
     setError(null);
-
-    // Resetear el input para poder volver a seleccionar las mismas fotos
     e.target.value = '';
   };
 
-  // Eliminar imagen individual por índice
   const clearImage = (index) => {
     setImages(prev => {
       const next = [...prev];
-      URL.revokeObjectURL(next[index].preview); // liberar memoria
+      URL.revokeObjectURL(next[index].preview);
       next.splice(index, 1);
       return next;
     });
   };
 
-  // Eliminar todas
   const clearAll = () => {
     images.forEach(img => URL.revokeObjectURL(img.preview));
     setImages([]);
   };
 
-  // ── Publicar ────────────────────────────────────────────────────────
   const publishMoment = async () => {
     try {
       setLoading(true);
@@ -81,12 +75,11 @@ const Publicar = () => {
       formData.append("contenido", momentText);
       formData.append("tipo", "update");
 
-      // Agregar cada imagen con el campo que espera tu backend
       images.forEach(({ file }) => {
-        formData.append("imagenes", file); // mismo campo que antes, repetido
+        formData.append("imagenes", file);
       });
 
-      const response = await fetch("${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts", {
+      const response = await fetch(`${API_BASE}/api/posts`, { // ✅ corregido
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -96,7 +89,6 @@ const Publicar = () => {
 
       if (!response.ok) throw new Error(data.message || "Error al publicar");
 
-      // Limpiar
       setMomentText("");
       clearAll();
       setSuccess(true);
@@ -147,7 +139,6 @@ const Publicar = () => {
 
               <PublishTextarea value={momentText} setValue={setMomentText} disabled={loading} />
 
-              {/* Preview de múltiples imágenes */}
               <ImagePreview
                 images={images}
                 clearImage={clearImage}
@@ -155,7 +146,6 @@ const Publicar = () => {
                 disabled={loading}
               />
 
-              {/* Solo mostrar el botón de añadir fotos si no llegamos al límite */}
               {images.length < MAX_IMAGES && (
                 <PublishOptions handleImages={handleImages} disabled={loading} />
               )}
@@ -182,8 +172,6 @@ const Publicar = () => {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 };

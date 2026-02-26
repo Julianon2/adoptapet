@@ -1,36 +1,57 @@
-
-
-# Dependencies
+# ==========================================
+# DEPENDENCIAS
+# ==========================================
 node_modules/
-npm-debug.log*
+backend/node_modules/
 
-# Environment variables
+# ==========================================
+# VARIABLES DE ENTORNO (MUY IMPORTANTE)
+# ==========================================
 .env
 .env.local
 .env.production
+.env.production.local
+backend/.env
+backend/.env.local
 
-# Logs
+# ==========================================
+# ARCHIVOS DE BUILD
+# ==========================================
+dist/
+build/
+backend/dist/
+backend/build/
+
+# ==========================================
+# UPLOADS (archivos subidos por usuarios)
+# ==========================================
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ==========================================
+# LOGS
+# ==========================================
 *.log
+npm-debug.log*
+yarn-debug.log*
 logs/
 
-# Runtime data
-pids/
-*.pid
-*.seed
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# IDE files
+# ==========================================
+# EDITORES DE CÓDIGO
+# ==========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS generated files
+# ==========================================
+# SISTEMAS OPERATIVOS
+# ==========================================
 .DS_Store
 Thumbs.db
 
-# Temporary files
-tmp/
-temp/
+# ==========================================
+# TESTING
+# ==========================================
+coverage/
+.nyc_output/

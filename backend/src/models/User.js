@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
             },
             message: 'Email inválido'
         },
-        index: true
+        
     },
     
     password: {
